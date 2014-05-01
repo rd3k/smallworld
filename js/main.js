@@ -1,57 +1,5 @@
 "use strict";
 
-google.load("visualization", "1", {packages:["corechart"]});
-
-var chart,
-	chartOptions = {
-		legend: {"position": "none"},
-		width: 300,
-		backgroundColor: { fill: "transparent" },
-		colors: ["#444"],
-		vAxis: {ticks: [], title: "Number of nodes"},
-		hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: 'transparent', gridlines: {color: 'transparent'}, minorGridlines: {count: 0}, slantedText: false},
-		chartArea: {left:30, top:30, width: 250, height: 140}
-	};
-
-google.setOnLoadCallback(drawChart);
-
-function drawChart() {
-
-	chart = new google.visualization.ColumnChart(UI.degreeChart);
-
-	var chartData = [['Degree', 'Quantity']];
-
-	var degrees = SmallWorld.getDegrees();
-	var max = 0, maxd = 0;
-	
-	for (var d in degrees) {
-		chartData.push([d,  degrees[d]]);
-		if (degrees[d] > max) {
-			max = degrees[d];
-		}
-		if (+d > maxd) {
-			maxd = +d;
-		}
-	}
-
-	var data = google.visualization.arrayToDataTable(chartData);
-
-	chartOptions.vAxis.ticks = [];
-	for (var i = 0; i <= max; i++) {
-		chartOptions.vAxis.ticks.push(i);
-	}
-
-	chartOptions.hAxis.ticks = [];
-	for (var i = 0; i <= maxd; i++) {
-		chartOptions.hAxis.ticks.push(i);
-	}
-
-	chart.draw(data, chartOptions);
-
-}
-
-
-
 Array.prototype.remove = function(val) {
 	var idx = this.indexOf(val);
 	if (idx != -1) {
@@ -61,9 +9,9 @@ Array.prototype.remove = function(val) {
 }
 
 var rand = function () {
-	//var vivaRand = Viva.random(123);
-	return Math.random();
-	//return vivaRand.nextDouble();
+	var vivaRand = Viva.random(123);
+	//return Math.random();
+	return vivaRand.nextDouble();
 }
 
 var n = 10, k = 2 , p = 0;
@@ -104,7 +52,7 @@ var SmallWorld = (function () {
 			for (var i = 0, linkUI; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
-					linkUI.attr('stroke', 'red').attr('stroke-width', 2);
+					linkUI.attr('stroke', 'red');
 					graphics.getNodeUI(links[i].toId).attr('fill', 'red');
 					graphics.getNodeUI(links[i].fromId).attr('fill', 'red');
 				}
@@ -117,12 +65,11 @@ var SmallWorld = (function () {
 			for (var i = 0, linkUI; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
-					linkUI.attr('stroke', '#999').attr('stroke-width', 1);
+					linkUI.attr('stroke', '#999');
 					graphics.getNodeUI(links[i].toId).attr('fill', '#000');
 					graphics.getNodeUI(links[i].fromId).attr('fill', '#000');
 				}
 			};
-			graphics.getNodeUI(node.id).attr('fill', '#000');
 		});
 
 		return ui;
@@ -144,24 +91,9 @@ var SmallWorld = (function () {
 	}
 
 	function getDegrees() {
-		var degrees = {}, max = 0;
 		graph.forEachNode(function(node){
-			var degree = graph.getLinks(node.id).length;
-			if (degrees.hasOwnProperty(degree)) {
-				degrees[degree]++;
-			} else {
-				degrees[degree] = 1;
-			}
-			if (degree > max) {
-				max = degree;
-			}
+			// ...
 		});
-		for (var i = 0; i < max; i++) {
-			if (!degrees.hasOwnProperty(i)) {
-				degrees[i] = 0;
-			}
-		}
-		return degrees;
 	}
 
 	// THIS DOES NOT WORK PROPERLY
@@ -204,7 +136,49 @@ var SmallWorld = (function () {
 		return -1;
 
 	}
-
+	function DijktraShortestPath(sourceNodeId, targetNodeId)
+	{
+		return Dijkstra(sourceNodeId)[targetNodeId];
+	}
+	function Dijkstra(sourceNodeId) {
+		var dist = [], previous = [], que = [];
+		for (var i = 0; i < n; i++) {
+			dist[i] = 1000;
+			previous[i] = -1;
+			que.push(i);
+		}
+		dist[sourceNodeId] = 0;
+		while(que.length > 0){
+			var u = getSmallestValueIndex(dist,que);
+			que.splice(que.indexOf(u),1);
+			if(dist[u] == 1000){
+				break;
+			}
+			graph.forEachLinkedNode(u, function(linkedNode, link){
+				var alt = dist[u] + 1;
+				if(alt < dist[linkedNode.id]){
+					dist[linkedNode.id] = alt;
+					previous[linkedNode.id] = u;
+					que.splice(que.indexOf(linkedNode.id),1);
+					que.unshift(linkedNode.id);
+				}
+			}); 
+		}
+		printArray(dist);
+		return dist;
+	}
+	function printArray(array){
+		for(var i = 0; i < array.length; i++)
+			console.log(i + ": " + array[i]);
+	}
+	function getSmallestValueIndex(valueArray, array){
+		var smallest = array[0];
+		for(var i = 1; i < array.length; i++){
+			if(valueArray[array[i]] < valueArray[smallest])
+				smallest = array[i];
+		}
+		return smallest;
+	}
 	function averageGeodesicDistance() {
 
 		var sum = 0;
@@ -367,7 +341,8 @@ var SmallWorld = (function () {
     	rewireCount: rewireCount,
     	averageGeodesicDistance: averageGeodesicDistance,
     	breadthFirstSearchDepth: breadthFirstSearchDepth,
-    	getDegrees: getDegrees
+		DijktraShortestPath: DijktraShortestPath
+		
     };
 
 })();
@@ -381,7 +356,6 @@ var UI = {
 	kVal: document.getElementById("kVal"),
 	edgesVal: document.getElementById("edgesVal"),
 	rewireVal: document.getElementById("rewireVal"),
-	degreeChart: document.getElementById("degreeChart")
 };
 
 function readHash() {
@@ -468,7 +442,6 @@ UI.nChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.nChanger.addEventListener("input", function(e) {
 	UI.nVal.innerHTML = e.target.valueAsNumber;
@@ -481,7 +454,6 @@ UI.kChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.kChanger.addEventListener("input", function(e) {
 	UI.kVal.innerHTML = e.target.valueAsNumber;
@@ -494,7 +466,6 @@ UI.pChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.pChanger.addEventListener("input", function(e) {
 	UI.pVal.innerHTML = e.target.valueAsNumber;
@@ -504,7 +475,6 @@ document.body.addEventListener('keyup', function(e) {
 	if (e.which === 32) {
 		SmallWorld.createLinks();
 		updateRewireCount();
-		drawChart();
 	}
 });
 
