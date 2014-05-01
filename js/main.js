@@ -195,7 +195,7 @@ var SmallWorld = (function () {
 
 		}
 
-		return -1;
+		return Number.MAX_VALUE;
 	}
 
 	/*
@@ -256,8 +256,9 @@ var SmallWorld = (function () {
 	}
 	function Dijkstra(sourceNodeId) {
 		var dist = [], previous = [], que = [];
+		var INF = Number.MAX_VALUE;
 		for (var i = 0; i < n; i++) {
-			dist[i] = 1000;
+			dist[i] = INF;
 			previous[i] = -1;
 			que.push(i);
 		}
@@ -265,7 +266,7 @@ var SmallWorld = (function () {
 		while(que.length > 0){
 			var u = getSmallestValueIndex(dist,que);
 			que.splice(que.indexOf(u),1);
-			if(dist[u] == 1000){
+			if(dist[u] == INF){
 				break;
 			}
 			graph.forEachLinkedNode(u, function(linkedNode, link){
@@ -317,25 +318,35 @@ var SmallWorld = (function () {
 			dists = floydWarshall(0,0,true);
 		}
 
+		var dist = 0;
+		var noOfEdges = 0;
 		for (var i = 0; i < n; i++) {
-			for (var j = 0; j < n; j++) {
-				if (i != j) {
-
-					// Find shortest path between i and j
-					if (mode == 'BFS') {
-						sum += breadthFirstSearchDepth(i, j);
-					}
-					else if (mode == "FW") {
-						sum += dists[i][j];
-					}
-					else {
-						sum += DijktraShortestPath(i,j);
-					} 
-						
+			for (var j = i + 1; j < n; j++) {
+				
+				// Find shortest path between i and j
+				if (mode == 'BFS') {
+					 dist = breadthFirstSearchDepth(i, j);
 				}
+				else if (mode == "FW") {
+					dist = dists[i][j];
+				}
+				else {
+					dist = DijktraShortestPath(i,j);
+				} 
+
+				if (dist != Number.MAX_VALUE)
+				{
+					++noOfEdges;
+					sum += dist;
+				}	
+				
 			}
 		}
-		sum *= 1 / (0.5 * n * (n - 1));
+		
+		if (noOfEdges == 0)
+			sum = 0;
+		else 
+			sum *= 1 / noOfEdges;
 		return sum;
 
 	}
