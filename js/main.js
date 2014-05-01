@@ -52,7 +52,6 @@ function drawChart() {
 
 
 
-
 Array.prototype.remove = function(val) {
 	var idx = this.indexOf(val);
 	if (idx != -1) {
@@ -105,7 +104,7 @@ var SmallWorld = (function () {
 			for (var i = 0, linkUI; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
-					linkUI.attr('stroke', 'red');
+					linkUI.attr('stroke', 'red').attr('stroke-width', 2);
 					graphics.getNodeUI(links[i].toId).attr('fill', 'red');
 					graphics.getNodeUI(links[i].fromId).attr('fill', 'red');
 				}
@@ -118,7 +117,7 @@ var SmallWorld = (function () {
 			for (var i = 0, linkUI; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
-					linkUI.attr('stroke', '#999');
+					linkUI.attr('stroke', '#999').attr('stroke-width', 1);
 					graphics.getNodeUI(links[i].toId).attr('fill', '#000');
 					graphics.getNodeUI(links[i].fromId).attr('fill', '#000');
 				}
@@ -384,10 +383,6 @@ var UI = {
 	rewireVal: document.getElementById("rewireVal"),
 	degreeChart: document.getElementById("degreeChart")
 };
-
-function drawDegreeChart() {
-
-}
 
 function readHash() {
 
