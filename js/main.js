@@ -168,33 +168,27 @@ var SmallWorld = (function () {
 	// DEPTH IS NOT CORRECT
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
-		var visitQueue = [], visited = [], depth = 0, elementsToDepthIncrease = 1, nextElementsToDepthIncrease = 0, t;
+		var visitQueue = [], visited = [], depths = [], elementsToDepthIncrease = 1, nextElementsToDepthIncrease = 0, t;
 
 		visitQueue.push(sourceNodeId);
 		visited.push(sourceNodeId);
+		depths.push(0);
 
 		while (visitQueue.length > 0) {
 
-			t = visitQueue.pop();
+			t = visitQueue.shift();
 
 			if (t === targetNodeId) {
+				return depths[visited.indexOf(t)];
 
-				return depth;
-
-			}
-
-			nextElementsToDepthIncrease += graph.getLinks(t).length;
-			if (--elementsToDepthIncrease == 0) {
-				depth++;
-				elementsToDepthIncrease = nextElementsToDepthIncrease;
-				nextElementsToDepthIncrease = 0;
 			}
 
 			graph.forEachLinkedNode(t, function(linkedNode, link){
 
 				if (visited.indexOf(linkedNode.id) === -1) {
 					visited.push(linkedNode.id);
-					visitQueue.unshift(linkedNode.id);
+					depths.push(depths[visited.indexOf(t)] + 1);
+					visitQueue.push(linkedNode.id);
 				}
 
 			});
@@ -232,7 +226,7 @@ var SmallWorld = (function () {
 				}
 			}); 
 		}
-		printArray(dist);
+		//printArray(dist);
 		return dist;
 	}
 	function printArray(array){
@@ -247,7 +241,10 @@ var SmallWorld = (function () {
 		}
 		return smallest;
 	}
-	function averageGeodesicDistance() {
+
+	// mode = 'BFS' for Breadth First Search
+	// default Dijkstra
+	function averageGeodesicDistance(mode) {
 
 		var sum = 0;
 
@@ -262,16 +259,19 @@ var SmallWorld = (function () {
 		for (var i = 0; i < n; i++) {
 			for (var j = 0; j < n; j++) {
 				if (i != j) {
-
 					// Find shortest path between i and j
-					sum += breadthFirstSearchDepth(i, j);
-
+					if (mode == 'BFS') {
+						sum += breadthFirstSearchDepth(i, j);
+					}
+					else {
+						sum += DijktraShortestPath(i,j);
+					} 
+						
 				}
 			}
 		}
 
 		sum *= 1 / (0.5 * n * (n - 1));
-
 		return sum;
 
 	}
