@@ -297,7 +297,7 @@ var SmallWorld = (function () {
 
 	// mode = 'BFS' for Breadth First Search
 	// mode = "FW" for Floyd Warshall
-	// default Dijkstra
+	// mode = "DJK" for Dijstrak
 	function averageGeodesicDistance(mode) {
 
 		var sum = 0;
@@ -321,6 +321,12 @@ var SmallWorld = (function () {
 		var dist = 0;
 		var noOfEdges = 0;
 		for (var i = 0; i < n; i++) {
+
+			if (mode == "DJK")
+			{
+				dists = Dijkstra(i);
+			}
+
 			for (var j = i + 1; j < n; j++) {
 				
 				// Find shortest path between i and j
@@ -330,8 +336,8 @@ var SmallWorld = (function () {
 				else if (mode == "FW") {
 					dist = dists[i][j];
 				}
-				else {
-					dist = DijktraShortestPath(i,j);
+				else if (mode == "DJK") {
+					dist = dists[j];
 				} 
 
 				if (dist != Number.MAX_VALUE)
@@ -559,7 +565,7 @@ function updateRewireCount() {
 
 function updateL() {
 	setTimeout(function(){
-		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
+		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance('DJK').toFixed(2);
 		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance('BFS').toFixed(2);
 		UI.fwVal.innerHTML = "FW L = " + SmallWorld.averageGeodesicDistance('FW').toFixed(2);
 	});
