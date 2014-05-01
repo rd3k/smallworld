@@ -355,19 +355,15 @@ var SmallWorld = (function () {
 					dist = dists[j];
 				} 
 
-				if (dist != Number.MAX_VALUE)
-				{
-					++noOfEdges;
-					sum += dist;
-				}	
+				if (dist == Number.MAX_VALUE)
+					return [Infinity, Infinity];
+				
+				sum += dist;	
 				
 			}
 		}
 		
-		if (noOfEdges == 0)
-			sum = 0;
-		else 
-			sum *= 1 / noOfEdges;
+		sum *= 1 / (0.5 * n * (n-1));
 
 		return [sum, steps];
 
