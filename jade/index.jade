@@ -1,0 +1,22 @@
+doctype html
+html(lang="en")
+  head
+    title= "Small-world network"
+    link(href="css/screen.css", rel="stylesheet")
+  body
+    div#controls
+      label(for="nChanger", title="Number of nodes")= "n: "
+      input(type="range", min="4", max="50" id="nChanger")
+      span(id="nVal", class="val")
+      label(for="kChanger", title="Number of initial nearest-neighbour links")= "k: "
+      input(type="range", min="2", max="10" step="2" id="kChanger")
+      span(id="kVal", class="val")
+      label(for="pChanger", title="Probability of link rewiring")= "p: "
+      input(type="range", min="0.0", max="1.0", step=".1", id="pChanger")
+      span(id="pVal", class="val")
+    div#stats
+      span(id="edgesVal")
+      span(id="rewireVal")
+    p#help= "Press space to generate a new network"
+    script(src="js/viva.min.js")
+    script(src="js/main.js")

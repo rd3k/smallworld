@@ -1,0 +1,70 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+@import "compass/css3";
+@import "compass/css3/user-interface";
+@import url(http://fonts.googleapis.com/css?family=Play);
+
+body {
+	font-family: 'Play', sans-serif;
+	@include user-select(none);
+	background: url('../tiny_grid.png');
+}
+
+body.loading svg {
+	opacity: .5;
+}
+
+body, svg {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    margin: 0;
+    left: 0;
+    top: 0;
+    z-index: -1;
+}
+
+.box {
+	width: 200px;
+	margin: 8px;
+	padding: 8px;
+	text-align: center;
+	@include border-radius(6px);
+}
+
+#controls {
+	@extend .box;
+	background: #eee;
+
+	label, span.val {
+		width: 30px;
+		display: inline-block;
+		line-height: 30px;
+	}
+}
+
+#stats {
+	@extend .box;
+	background: #ccc;
+
+	span {
+		display: block;
+		line-height: 30px;
+	}
+}
+
+#help {
+	position: absolute;
+	bottom: 20px;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+circle {
+	cursor: pointer;
+}
