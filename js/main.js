@@ -541,7 +541,7 @@ function updateRewireCount() {
 function updateL() {
 	setTimeout(function(){
 		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
-		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
+		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance('BFS').toFixed(2);
 		UI.fwVal.innerHTML = "FW L = " + SmallWorld.averageGeodesicDistance('FW').toFixed(2);
 	});
 }
