@@ -9,9 +9,9 @@ Array.prototype.remove = function(val) {
 }
 
 var rand = function () {
-	var vivaRand = Viva.random(123);
-	//return Math.random();
-	return vivaRand.nextDouble();
+	//var vivaRand = Viva.random(123);
+	return Math.random();
+	//return vivaRand.nextDouble();
 }
 
 var n = 10, k = 2 , p = 0;
