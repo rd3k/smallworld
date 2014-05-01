@@ -10,7 +10,7 @@ var chart,
 		colors: ["#444"],
 		vAxis: {ticks: [], title: "Number of nodes"},
 		hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: 'transparent', gridlines: {color: 'transparent'}, minorGridlines: {count: 0}, slantedText: false},
-		chartArea: {left:30, top:30, width: 250, height: 140}
+		chartArea: {left:30, top:30, width: 260, height: 220}
 	};
 
 google.setOnLoadCallback(drawChart);
@@ -168,7 +168,7 @@ var SmallWorld = (function () {
 	// DEPTH IS NOT CORRECT
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
-		var visitQueue = [], visited = [], depths = [], elementsToDepthIncrease = 1, nextElementsToDepthIncrease = 0, t;
+		var visitQueue = [], visited = [], depths = [], t;
 
 		visitQueue.push(sourceNodeId);
 		visited.push(sourceNodeId);
@@ -399,19 +399,19 @@ var SmallWorld = (function () {
 		return rewires;
 	}
 
-    return {
-    	init: init,
-    	createLinks: createLinks,
-    	setN: setN,
-    	setK: setK,
-    	setP: setP,
-    	edgeCount: edgeCount,
-    	rewireCount: rewireCount,
-    	averageGeodesicDistance: averageGeodesicDistance,
-    	breadthFirstSearchDepth: breadthFirstSearchDepth,
-    	getDegrees: getDegrees,
-    	DijktraShortestPath: DijktraShortestPath
-    };
+	return {
+		init: init,
+		createLinks: createLinks,
+		setN: setN,
+		setK: setK,
+		setP: setP,
+		edgeCount: edgeCount,
+		rewireCount: rewireCount,
+		averageGeodesicDistance: averageGeodesicDistance,
+		breadthFirstSearchDepth: breadthFirstSearchDepth,
+		getDegrees: getDegrees,
+		DijktraShortestPath: DijktraShortestPath
+	};
 
 })();
 
@@ -424,7 +424,9 @@ var UI = {
 	kVal: document.getElementById("kVal"),
 	edgesVal: document.getElementById("edgesVal"),
 	rewireVal: document.getElementById("rewireVal"),
-	degreeChart: document.getElementById("degreeChart")
+	degreeChart: document.getElementById("degreeChart"),
+	dijkstraLVal: document.getElementById("dijkstraLVal"),
+	bfsLVal: document.getElementById("bfsLVal"),
 };
 
 function readHash() {
@@ -479,6 +481,13 @@ function updateRewireCount() {
 	});
 }
 
+function updateL() {
+	setTimeout(function(){
+		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
+		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
+	});
+}
+
 function updateHash() {
 	window.location.hash = UI.nVal.innerHTML + "|" + UI.kVal.innerHTML + "|" + UI.pVal.innerHTML;
 }
@@ -501,12 +510,12 @@ function init() {
 	updateHash();
 	updateEdgeCount();
 	updateRewireCount();
+	updateL();
 
 }
 
 UI.nChanger.addEventListener("change", function(e) {
 	var n = e.target.valueAsNumber;
-	//SmallWorld.setN(n);
 	UI.nVal.innerHTML = n;
 	updateEdgeCount();
 	updateRewireCount();
@@ -519,7 +528,6 @@ UI.nChanger.addEventListener("input", function(e) {
 
 UI.kChanger.addEventListener("change", function(e) {
 	var k = e.target.valueAsNumber;
-	//SmallWorld.setK(k);
 	UI.kVal.innerHTML = k;
 	updateEdgeCount();
 	updateRewireCount();
@@ -531,8 +539,7 @@ UI.kChanger.addEventListener("input", function(e) {
 });
 
 UI.pChanger.addEventListener("change", function(e) {
-	var p = e.target.valueAsNumber
-	//SmallWorld.setP(p);
+	var p = e.target.valueAsNumber;
 	UI.pVal.innerHTML = p;
 	updateEdgeCount();
 	updateRewireCount();
@@ -553,7 +560,6 @@ document.body.addEventListener('keyup', function(e) {
 
 window.addEventListener("hashchange", function() {
 	init();
-	setTimeout(drawChart);
 }, false);
 
 init();
