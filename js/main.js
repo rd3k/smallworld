@@ -1,5 +1,58 @@
 "use strict";
 
+google.load("visualization", "1", {packages:["corechart"]});
+
+var chart,
+	chartOptions = {
+		legend: {"position": "none"},
+		width: 300,
+		backgroundColor: { fill: "transparent" },
+		colors: ["#444"],
+		vAxis: {ticks: [], title: "Number of nodes"},
+		hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: 'transparent', gridlines: {color: 'transparent'}, minorGridlines: {count: 0}, slantedText: false},
+		chartArea: {left:30, top:30, width: 250, height: 140}
+	};
+
+google.setOnLoadCallback(drawChart);
+
+function drawChart() {
+
+	chart = new google.visualization.ColumnChart(UI.degreeChart);
+
+	var chartData = [['Degree', 'Quantity']];
+
+	var degrees = SmallWorld.getDegrees();
+	var max = 0, maxd = 0;
+	
+	for (var d in degrees) {
+		chartData.push([d,  degrees[d]]);
+		if (degrees[d] > max) {
+			max = degrees[d];
+		}
+		if (+d > maxd) {
+			maxd = +d;
+		}
+	}
+
+	var data = google.visualization.arrayToDataTable(chartData);
+
+	chartOptions.vAxis.ticks = [];
+	for (var i = 0; i <= max; i++) {
+		chartOptions.vAxis.ticks.push(i);
+	}
+
+	chartOptions.hAxis.ticks = [];
+	for (var i = 0; i <= maxd; i++) {
+		chartOptions.hAxis.ticks.push(i);
+	}
+
+	chart.draw(data, chartOptions);
+
+}
+
+
+
+
 Array.prototype.remove = function(val) {
 	var idx = this.indexOf(val);
 	if (idx != -1) {
@@ -70,6 +123,7 @@ var SmallWorld = (function () {
 					graphics.getNodeUI(links[i].fromId).attr('fill', '#000');
 				}
 			};
+			graphics.getNodeUI(node.id).attr('fill', '#000');
 		});
 
 		return ui;
@@ -91,9 +145,24 @@ var SmallWorld = (function () {
 	}
 
 	function getDegrees() {
+		var degrees = {}, max = 0;
 		graph.forEachNode(function(node){
-			// ...
+			var degree = graph.getLinks(node.id).length;
+			if (degrees.hasOwnProperty(degree)) {
+				degrees[degree]++;
+			} else {
+				degrees[degree] = 1;
+			}
+			if (degree > max) {
+				max = degree;
+			}
 		});
+		for (var i = 0; i < max; i++) {
+			if (!degrees.hasOwnProperty(i)) {
+				degrees[i] = 0;
+			}
+		}
+		return degrees;
 	}
 
 	// THIS DOES NOT WORK PROPERLY
@@ -298,7 +367,8 @@ var SmallWorld = (function () {
     	edgeCount: edgeCount,
     	rewireCount: rewireCount,
     	averageGeodesicDistance: averageGeodesicDistance,
-    	breadthFirstSearchDepth: breadthFirstSearchDepth
+    	breadthFirstSearchDepth: breadthFirstSearchDepth,
+    	getDegrees: getDegrees
     };
 
 })();
@@ -312,7 +382,12 @@ var UI = {
 	kVal: document.getElementById("kVal"),
 	edgesVal: document.getElementById("edgesVal"),
 	rewireVal: document.getElementById("rewireVal"),
+	degreeChart: document.getElementById("degreeChart")
 };
+
+function drawDegreeChart() {
+
+}
 
 function readHash() {
 
@@ -398,6 +473,7 @@ UI.nChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
+	drawChart();
 });
 UI.nChanger.addEventListener("input", function(e) {
 	UI.nVal.innerHTML = e.target.valueAsNumber;
@@ -410,6 +486,7 @@ UI.kChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
+	drawChart();
 });
 UI.kChanger.addEventListener("input", function(e) {
 	UI.kVal.innerHTML = e.target.valueAsNumber;
@@ -422,6 +499,7 @@ UI.pChanger.addEventListener("change", function(e) {
 	updateEdgeCount();
 	updateRewireCount();
 	updateHash();
+	drawChart();
 });
 UI.pChanger.addEventListener("input", function(e) {
 	UI.pVal.innerHTML = e.target.valueAsNumber;
@@ -431,6 +509,7 @@ document.body.addEventListener('keyup', function(e) {
 	if (e.which === 32) {
 		SmallWorld.createLinks();
 		updateRewireCount();
+		drawChart();
 	}
 });
 
