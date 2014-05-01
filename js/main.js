@@ -582,13 +582,13 @@ function updateRewireCount() {
 function updateL() {
 	setTimeout(function(){
 		var result = SmallWorld.averageGeodesicDistance('DJK');
-		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " steps = " + result[1];
+		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " S = " + result[1];
 
 		result = SmallWorld.averageGeodesicDistance('BFS');
-		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " steps = " + result[1];
+		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " S = " + result[1];
 
 		result = SmallWorld.averageGeodesicDistance('FW');
-		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " steps = " + result[1];
+		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " S = " + result[1];
 	});
 }
 
