@@ -309,15 +309,24 @@ var SmallWorld = (function () {
 
 		*/
 
+
+		// If mode is FloyWarshall do only one call
+		var dists;
+		if (mode == 'FW')
+		{
+			dists = floydWarshall(0,0,true);
+		}
+
 		for (var i = 0; i < n; i++) {
 			for (var j = 0; j < n; j++) {
 				if (i != j) {
+
 					// Find shortest path between i and j
 					if (mode == 'BFS') {
 						sum += breadthFirstSearchDepth(i, j);
 					}
 					else if (mode == "FW") {
-						sum += floydWarshall(i,j);
+						sum += dists[i][j];
 					}
 					else {
 						sum += DijktraShortestPath(i,j);
@@ -326,7 +335,6 @@ var SmallWorld = (function () {
 				}
 			}
 		}
-
 		sum *= 1 / (0.5 * n * (n - 1));
 		return sum;
 
