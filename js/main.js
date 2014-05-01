@@ -169,7 +169,8 @@ var SmallWorld = (function () {
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
 		var visitQueue = [], visited = [], depths = [], t;
-		var steps = 0;
+		var perf = window.performance;
+		var start = perf.now();
 
 		visitQueue.push(sourceNodeId);
 		visited.push(sourceNodeId);
@@ -178,9 +179,9 @@ var SmallWorld = (function () {
 		while (visitQueue.length > 0) {
 
 			t = visitQueue.shift();
-			steps++;
 			if (t === targetNodeId) {
-				return [depths[visited.indexOf(t)], steps];
+				var end = perf.now();
+				return [depths[visited.indexOf(t)], end - start];
 
 			}
 
@@ -195,8 +196,7 @@ var SmallWorld = (function () {
 			});
 
 		}
-
-		return [Number.MAX_VALUE, steps];
+		return [Number.MAX_VALUE, 0];
 	}
 
 	/*
@@ -214,7 +214,8 @@ var SmallWorld = (function () {
 	{
 		var INF = Number.MAX_VALUE;
 		var dist = []; 
-		var steps = 0;
+		var perf = window.performance;
+		var start = perf.now();
 
 		// Initialize the array of distances 
 		for(var i = 0; i < n; ++i)
@@ -239,20 +240,17 @@ var SmallWorld = (function () {
             	for(var j = 0; j < n; ++j)
             	{
                 	dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
-            		++steps;
             	}
 	    
-
+        var end = perf.now();
 	    // Return the right answer based on the allPaths paramter
 	    if (allPaths) 
 	    {
-	    	return [dist, steps];
+	    	return [dist, end - start];
 	    }
 	    else 
 	    {
-	    	if (dist[sourceNodeId][targetNodeId] == INF)
-	    		return -1;
-	    	return [dist[sourceNodeId][targetNodeId], steps];
+	    	return [dist[sourceNodeId][targetNodeId], end - start];
 	    }
 	}
 
@@ -263,7 +261,8 @@ var SmallWorld = (function () {
 	function Dijkstra(sourceNodeId) {
 		var dist = [], previous = [], que = [];
 		var INF = Number.MAX_VALUE;
-		var steps = 0;
+		var perf = window.performance;
+		var start = perf.now();
 		for (var i = 0; i < n; i++) {
 			dist[i] = INF;
 			previous[i] = -1;
@@ -271,7 +270,6 @@ var SmallWorld = (function () {
 		}
 		dist[sourceNodeId] = 0;
 		while(que.length > 0){
-			steps ++;
 			var u = getSmallestValueIndex(dist,que);
 			que.splice(que.indexOf(u),1);
 			if(dist[u] == INF){
@@ -287,8 +285,9 @@ var SmallWorld = (function () {
 				}
 			}); 
 		}
-		//printArray(dist);
-		return [dist, steps];
+		
+		var end = perf.now();
+		return [dist, end - start];
 	}
 	function printArray(array){
 		for(var i = 0; i < array.length; i++)
@@ -320,13 +319,13 @@ var SmallWorld = (function () {
 
 
 		var dists;
-		var steps= 0;
+		var time = 0;
 		var result;
 		if (mode == 'FW')
 		{
 			result = floydWarshall(0,0,true);
 			dists = result[0];
-			steps = result[1];
+			time = result[1];
 		}
 
 		var dist = 0;
@@ -337,7 +336,7 @@ var SmallWorld = (function () {
 			{
 				result = Dijkstra(i);
 				dists = result[0];
-				steps += result[1];
+				time += result[1];
 			}
 
 			for (var j = i + 1; j < n; j++) {
@@ -346,7 +345,7 @@ var SmallWorld = (function () {
 				if (mode == 'BFS') {
 					 result = breadthFirstSearchDepth(i, j);
 					 dist = result[0];
-					 steps += result[1];
+					 time += result[1];
 				}
 				else if (mode == "FW") {
 					dist = dists[i][j];
@@ -365,7 +364,7 @@ var SmallWorld = (function () {
 		
 		sum *= 1 / (0.5 * n * (n-1));
 
-		return [sum, steps];
+		return [sum, time];
 
 	}
 
@@ -578,13 +577,13 @@ function updateRewireCount() {
 function updateL() {
 	setTimeout(function(){
 		var result = SmallWorld.averageGeodesicDistance('DJK');
-		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " S = " + result[1];
+		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
 
 		result = SmallWorld.averageGeodesicDistance('BFS');
-		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " S = " + result[1];
+		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
 
 		result = SmallWorld.averageGeodesicDistance('FW');
-		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " S = " + result[1];
+		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
 	});
 }
 
