@@ -551,6 +551,9 @@ document.body.addEventListener('keyup', function(e) {
 	}
 });
 
-window.addEventListener("hashchange", init, false);
+window.addEventListener("hashchange", function() {
+	init();
+	setTimeout(drawChart);
+}, false);
 
 init();
