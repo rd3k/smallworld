@@ -196,8 +196,60 @@ var SmallWorld = (function () {
 		}
 
 		return -1;
-
 	}
+
+	/*
+	*  Returns the lenght of the shorthest path between the source node and the destination node
+	*  calculated using the Floyd–Warshall algorithm
+	*
+	*  @author Marius Popescu
+	*
+	*  @param Boolean allPaths - true if the method should return all a matrix will all the paths, false to return only the lenght of the required path
+	*  @param int sourceNodeId - starting node
+	*  @param int targetNodeId - destination node
+	*/
+	function floydWarshall(sourceNodeId, targetNodeId, allPaths)
+	{
+		var INF = Number.MAX_VALUE;
+		var dist = []; 
+
+		// Initialize the array of distances 
+		for(var i = 0; i < n; ++i)
+	    {
+	    	dist[i] = [];
+
+	    	// Initialize the path from node i to all the other nodes with INF
+	    	for (var j = 0; j < n; ++j)
+	    	{
+	    		dist[i][j] = INF;
+	    	}
+	    	
+	    	// For each neighbor initialize the size of the path
+	    	graph.forEachLinkedNode(i, function(linkedNode, link){
+				dist[i][linkedNode.id] = 1;
+			}); 
+	    }
+
+	    // FloydWarshall
+		for (var k = 0; k < n; ++k)
+       		for(var i = 0; i < n; ++i)
+            	for(var j = 0; j < n; ++j)
+                	dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+	    
+
+	    // Return the right answer based on the allPaths paramter
+	    if (allPaths) 
+	    {
+	    	return dist;
+	    }
+	    else 
+	    {
+	    	if (dist[sourceNodeId][targetNodeId] == INF)
+	    		return -1;
+	    	return dist[sourceNodeId][targetNodeId];
+	    }
+	}
+
 	function DijktraShortestPath(sourceNodeId, targetNodeId)
 	{
 		return Dijkstra(sourceNodeId)[targetNodeId];
@@ -243,6 +295,7 @@ var SmallWorld = (function () {
 	}
 
 	// mode = 'BFS' for Breadth First Search
+	// mode = "FW" for Floyd Warshall
 	// default Dijkstra
 	function averageGeodesicDistance(mode) {
 
@@ -262,6 +315,9 @@ var SmallWorld = (function () {
 					// Find shortest path between i and j
 					if (mode == 'BFS') {
 						sum += breadthFirstSearchDepth(i, j);
+					}
+					else if (mode == "FW") {
+						sum += floydWarshall(i,j);
 					}
 					else {
 						sum += DijktraShortestPath(i,j);
@@ -427,6 +483,7 @@ var UI = {
 	degreeChart: document.getElementById("degreeChart"),
 	dijkstraLVal: document.getElementById("dijkstraLVal"),
 	bfsLVal: document.getElementById("bfsLVal"),
+	fwVal: document.getElementById("fwVal"),
 };
 
 function readHash() {
@@ -485,6 +542,7 @@ function updateL() {
 	setTimeout(function(){
 		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
 		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance().toFixed(2);
+		UI.fwVal.innerHTML = "FW L = " + SmallWorld.averageGeodesicDistance('FW').toFixed(2);
 	});
 }
 
