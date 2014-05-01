@@ -169,6 +169,7 @@ var SmallWorld = (function () {
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
 		var visitQueue = [], visited = [], depths = [], t;
+		var steps = 0;
 
 		visitQueue.push(sourceNodeId);
 		visited.push(sourceNodeId);
@@ -177,9 +178,9 @@ var SmallWorld = (function () {
 		while (visitQueue.length > 0) {
 
 			t = visitQueue.shift();
-
+			steps++;
 			if (t === targetNodeId) {
-				return depths[visited.indexOf(t)];
+				return [depths[visited.indexOf(t)], steps];
 
 			}
 
@@ -195,7 +196,7 @@ var SmallWorld = (function () {
 
 		}
 
-		return Number.MAX_VALUE;
+		return [Number.MAX_VALUE, steps];
 	}
 
 	/*
@@ -207,11 +208,13 @@ var SmallWorld = (function () {
 	*  @param Boolean allPaths - true if the method should return all a matrix will all the paths, false to return only the lenght of the required path
 	*  @param int sourceNodeId - starting node
 	*  @param int targetNodeId - destination node
+	*  @return [dist, steps]
 	*/
 	function floydWarshall(sourceNodeId, targetNodeId, allPaths)
 	{
 		var INF = Number.MAX_VALUE;
 		var dist = []; 
+		var steps = 0;
 
 		// Initialize the array of distances 
 		for(var i = 0; i < n; ++i)
@@ -234,19 +237,22 @@ var SmallWorld = (function () {
 		for (var k = 0; k < n; ++k)
        		for(var i = 0; i < n; ++i)
             	for(var j = 0; j < n; ++j)
+            	{
                 	dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+            		++steps;
+            	}
 	    
 
 	    // Return the right answer based on the allPaths paramter
 	    if (allPaths) 
 	    {
-	    	return dist;
+	    	return [dist, steps];
 	    }
 	    else 
 	    {
 	    	if (dist[sourceNodeId][targetNodeId] == INF)
 	    		return -1;
-	    	return dist[sourceNodeId][targetNodeId];
+	    	return [dist[sourceNodeId][targetNodeId], steps];
 	    }
 	}
 
@@ -257,6 +263,7 @@ var SmallWorld = (function () {
 	function Dijkstra(sourceNodeId) {
 		var dist = [], previous = [], que = [];
 		var INF = Number.MAX_VALUE;
+		var steps = 0;
 		for (var i = 0; i < n; i++) {
 			dist[i] = INF;
 			previous[i] = -1;
@@ -264,6 +271,7 @@ var SmallWorld = (function () {
 		}
 		dist[sourceNodeId] = 0;
 		while(que.length > 0){
+			steps ++;
 			var u = getSmallestValueIndex(dist,que);
 			que.splice(que.indexOf(u),1);
 			if(dist[u] == INF){
@@ -280,7 +288,7 @@ var SmallWorld = (function () {
 			}); 
 		}
 		//printArray(dist);
-		return dist;
+		return [dist, steps];
 	}
 	function printArray(array){
 		for(var i = 0; i < array.length; i++)
@@ -311,11 +319,14 @@ var SmallWorld = (function () {
 		*/
 
 
-		// If mode is FloyWarshall do only one call
 		var dists;
+		var steps= 0;
+		var result;
 		if (mode == 'FW')
 		{
-			dists = floydWarshall(0,0,true);
+			result = floydWarshall(0,0,true);
+			dists = result[0];
+			steps = result[1];
 		}
 
 		var dist = 0;
@@ -324,14 +335,18 @@ var SmallWorld = (function () {
 
 			if (mode == "DJK")
 			{
-				dists = Dijkstra(i);
+				result = Dijkstra(i);
+				dists = result[0];
+				steps += result[1];
 			}
 
 			for (var j = i + 1; j < n; j++) {
 				
 				// Find shortest path between i and j
 				if (mode == 'BFS') {
-					 dist = breadthFirstSearchDepth(i, j);
+					 result = breadthFirstSearchDepth(i, j);
+					 dist = result[0];
+					 steps += result[1];
 				}
 				else if (mode == "FW") {
 					dist = dists[i][j];
@@ -353,7 +368,8 @@ var SmallWorld = (function () {
 			sum = 0;
 		else 
 			sum *= 1 / noOfEdges;
-		return sum;
+
+		return [sum, steps];
 
 	}
 
@@ -565,9 +581,14 @@ function updateRewireCount() {
 
 function updateL() {
 	setTimeout(function(){
-		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + SmallWorld.averageGeodesicDistance('DJK').toFixed(2);
-		UI.bfsLVal.innerHTML = "BFS L = " + SmallWorld.averageGeodesicDistance('BFS').toFixed(2);
-		UI.fwVal.innerHTML = "FW L = " + SmallWorld.averageGeodesicDistance('FW').toFixed(2);
+		var result = SmallWorld.averageGeodesicDistance('DJK');
+		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " steps = " + result[1];
+
+		result = SmallWorld.averageGeodesicDistance('BFS');
+		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " steps = " + result[1];
+
+		result = SmallWorld.averageGeodesicDistance('FW');
+		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " steps = " + result[1];
 	});
 }
 
