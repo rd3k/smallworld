@@ -408,7 +408,7 @@ var SmallWorld = (function () {
 				}
 
 				if (dist === Number.MAX_VALUE) {
-					return [Infinity, Infinity];
+					return [Infinity, time];
 				}
 
 				sum += dist;
