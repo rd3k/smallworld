@@ -164,8 +164,6 @@ var SmallWorld = (function () {
 		return degrees;
 	}
 
-	// THIS DOES NOT WORK PROPERLY
-	// DEPTH IS NOT CORRECT
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
 		var visitQueue = [], visited = [], depths = [], t;
@@ -654,6 +652,7 @@ document.body.addEventListener('keyup', function(e) {
 		SmallWorld.createLinks();
 		updateRewireCount();
 		drawChart();
+		updateL();
 	}
 });
 
