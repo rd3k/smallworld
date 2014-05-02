@@ -94,7 +94,12 @@ var SmallWorld = (function () {
 		}),
 		n, k, p,
 		rewires = 0,
-		nodeIDs = [];
+		nodeIDs = [],
+		hoverHighlight = false,
+		highlightedLinkUI = [],
+		highlightedNodeUI = [],
+		pathFrom = null,
+		pathTo = null;
 
 	// Draw as ring network
 	layout.placeNode(function(node) {
@@ -110,44 +115,111 @@ var SmallWorld = (function () {
 		var ui = Viva.Graph.svg("circle").attr('r', 5).attr("fill", "#000").attr("d", node.id);
 
 		ui.addEventListener("mousedown", function() {
+
+			var path,
+				link,
+				nodeUI,
+				linkUI,
+				i;
+
 			console.log("Node %o has degree %o", node.id, graph.getLinks(node.id).length);
+
+			if (pathFrom === null) {
+
+				pathFrom = node.id;
+
+				clearHighlight();
+
+				nodeUI = graphics.getNodeUI(pathFrom);
+				nodeUI.attr('fill', 'red');
+				highlightedNodeUI.push(nodeUI);
+
+			} else {
+
+				pathTo = node.id;
+
+				path = dijktraShortestPath(pathFrom, pathTo)[1];
+
+				if (path.length == 1) {
+
+					clearHighlight();
+					console.log("Unreachable");
+
+				} else {
+
+					/*for (i = 0; i < path.length; i++) {
+						nodeUI = graphics.getNodeUI(path[i]);
+						nodeUI.attr('fill', 'blue');
+						highlightedNodeUI.push(nodeUI);
+					}*/
+
+					nodeUI = graphics.getNodeUI(path[0]);
+					nodeUI.attr('fill', 'red');
+					highlightedNodeUI.push(nodeUI);
+
+					for (i = 0; i < path.length - 1; i++) {
+						link = graph.hasLink(path[i], path[i + 1]);
+						if (!link) {
+							link = graph.hasLink(path[i + 1], path[i]);
+						}
+						linkUI = graphics.getLinkUI(link.id);
+						highlightedLinkUI.push(linkUI);
+						linkUI.attr('stroke', 'red').attr('stroke-width', 2);
+					}
+
+				}
+
+				pathFrom = null;
+				pathTo = null;
+
+			}
+
 		});
 
 		ui.addEventListener("mouseover", function() {
 
+			if (!hoverHighlight) {
+				return;
+			}
+
 			var links = graph.getLinks(node.id),
 				linkUI,
+				fromUI,
+				toUI,
 				i;
 
 			for (i = 0; i < links.length; i++) {
+
 				linkUI = graphics.getLinkUI(links[i].id);
+
 				if (linkUI) {
+
+					highlightedLinkUI.push(linkUI);
 					linkUI.attr('stroke', 'red').attr('stroke-width', 2);
-					graphics.getNodeUI(links[i].toId).attr('fill', 'red');
-					graphics.getNodeUI(links[i].fromId).attr('fill', 'red');
+
+					toUI = graphics.getNodeUI(links[i].toId);
+					toUI.attr('fill', 'red');
+					highlightedNodeUI.push(toUI);
+
+					fromUI = graphics.getNodeUI(links[i].fromId);
+					fromUI.attr('fill', 'red');
+					highlightedNodeUI.push(fromUI);
+
 				}
+
 			}
 
-			graphics.getNodeUI(node.id).attr('fill', '#990000');
+			fromUI = graphics.getNodeUI(node.id);
+			fromUI.attr('fill', '#990000');
+			highlightedNodeUI.push(fromUI);
 
 		});
 
 		ui.addEventListener("mouseout", function() {
 
-			var links = graph.getLinks(node.id),
-				linkUI,
-				i;
-
-			for (i = 0; i < links.length; i++) {
-				linkUI = graphics.getLinkUI(links[i].id);
-				if (linkUI) {
-					linkUI.attr('stroke', '#999').attr('stroke-width', 1);
-					graphics.getNodeUI(links[i].toId).attr('fill', '#000');
-					graphics.getNodeUI(links[i].fromId).attr('fill', '#000');
-				}
+			if (hoverHighlight) {
+				clearHighlight();
 			}
-
-			graphics.getNodeUI(node.id).attr('fill', '#000');
 
 		});
 
@@ -164,8 +236,28 @@ var SmallWorld = (function () {
 		n = nVal;
 		k = kVal;
 		p = pVal;
+		highlightedLinkUI = [];
+		highlightedNodeUI = [];
+		pathFrom = null;
+		pathTo = null;
 		renderer.run();
 		create();
+
+	}
+
+	function clearHighlight() {
+
+		for (var i = 0; i < highlightedNodeUI.length; i++) {
+			highlightedNodeUI[i].attr('fill', '#000');
+		}
+
+		highlightedNodeUI = [];
+
+		for (var i = 0; i < highlightedLinkUI.length; i++) {
+			highlightedLinkUI[i].attr('stroke', '#999').attr('stroke-width', 1);
+		}
+
+		highlightedLinkUI = [];
 
 	}
 
@@ -299,7 +391,22 @@ var SmallWorld = (function () {
 
 	function dijktraShortestPath(sourceNodeId, targetNodeId) {
 
-		return dijkstra(sourceNodeId)[targetNodeId];
+		var result = dijkstra(sourceNodeId),
+			path = [],
+			u = targetNodeId;
+
+		if (result[0] === Number.MAX_VALUE) {
+			return [result, []];
+		}
+
+		while (result[2][u] !== -1) {
+			path.push(u);
+			u = result[2][u];
+		}
+
+		path.push(sourceNodeId);
+
+		return [result, path];
 
 	}
 
@@ -343,7 +450,7 @@ var SmallWorld = (function () {
 
 		}
 
-		return [dist, perf.now() - start];
+		return [dist, perf.now() - start, previous];
 
 	}
 

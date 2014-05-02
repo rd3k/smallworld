@@ -33,6 +33,7 @@ body, svg {
 	margin: 8px;
 	padding: 8px;
 	text-align: center;
+	border: 1px #bbb solid;
 	@include border-radius(6px);
 }
 
