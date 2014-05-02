@@ -53,8 +53,21 @@ body, svg {
 
 	span {
 		display: block;
+		font-size: 11px;
 		line-height: 30px;
 	}
+}
+
+#avpathlength {
+	@extend .box;
+	background: #ddd;
+
+	span {
+		display: block;
+		font-size: 11px;
+		line-height: 30px;
+	}
+
 }
 
 #help {
@@ -69,6 +82,15 @@ body, svg {
 	position: absolute;
 	top: 0;
 	right: 0;
+}
+
+.boxTitle {
+	background: #000;
+	color: #fff;
+	line-height: 24px;
+	margin-bottom: 6px;
+	@include border-top-left-radius(3px);
+	@include border-top-right-radius(3px);
 }
 
 circle {

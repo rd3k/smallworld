@@ -1,9 +1,33 @@
 "use strict";
 
-google.load("visualization", "1", {packages:["corechart"]});
+google.load("visualization", "1", {packages:["corechart"], callback: init});
 
-var chart,
-	chartOptions = {
+var ShortestPathAlgo = {};
+ShortestPathAlgo[ShortestPathAlgo["Dijkstra"] = 0] = "Dijkstra";
+ShortestPathAlgo[ShortestPathAlgo["BFS"] = 1] = "BFS";
+ShortestPathAlgo[ShortestPathAlgo["FloydWarshall"] = 2] = "FloydWarshall";
+
+var SmallWorldAlgo = {};
+SmallWorldAlgo[SmallWorldAlgo["WattsStrogatz"] = 0] = "WattsStrogatz";
+SmallWorldAlgo[SmallWorldAlgo["NewmannWatts"] = 1] = "NewmannWatts";
+
+var UI = {
+	pChanger: document.getElementById("pChanger"),
+	pVal: document.getElementById("pVal"),
+	nChanger: document.getElementById("nChanger"),
+	nVal: document.getElementById("nVal"),
+	kChanger: document.getElementById("kChanger"),
+	kVal: document.getElementById("kVal"),
+	edgesVal: document.getElementById("edgesVal"),
+	rewireVal: document.getElementById("rewireVal"),
+	degreeChart: document.getElementById("degreeChart"),
+	dijkstraLVal: document.getElementById("dijkstraLVal"),
+	bfsLVal: document.getElementById("bfsLVal"),
+	fwVal: document.getElementById("fwVal"),
+	clusterVal: document.getElementById("clusterVal")
+};
+
+var chartOptions = {
 		legend: {"position": "none"},
 		width: 300,
 		backgroundColor: { fill: "transparent" },
@@ -13,36 +37,36 @@ var chart,
 		chartArea: {left:30, top:30, width: 260, height: 220}
 	};
 
-google.setOnLoadCallback(drawChart);
-
 function drawChart() {
 
-	chart = new google.visualization.ColumnChart(UI.degreeChart);
+	var chartData = [['Degree', 'Quantity']],
+		degrees = SmallWorld.getDegrees(),
+		chart = new google.visualization.ColumnChart(UI.degreeChart),
+		maxq = 0,
+		maxd = 0,
+		data,
+		i,
+		d;
 
-	var chartData = [['Degree', 'Quantity']];
-
-	var degrees = SmallWorld.getDegrees();
-	var max = 0, maxd = 0;
-
-	for (var d in degrees) {
-		chartData.push([d,  degrees[d]]);
-		if (degrees[d] > max) {
-			max = degrees[d];
+	for (d in degrees) {
+		chartData.push([d, degrees[d]]);
+		if (degrees[d] > maxq) {
+			maxq = degrees[d];
 		}
-		if (+d > maxd) {
-			maxd = +d;
+		if (d > maxd) {
+			maxd = d;
 		}
 	}
 
-	var data = google.visualization.arrayToDataTable(chartData);
+	data = google.visualization.arrayToDataTable(chartData);
 
 	chartOptions.vAxis.ticks = [];
-	for (var i = 0; i <= max; i++) {
+	for (i = 0; i <= maxq; i++) {
 		chartOptions.vAxis.ticks.push(i);
 	}
 
 	chartOptions.hAxis.ticks = [];
-	for (var i = 0; i <= maxd; i++) {
+	for (i = 0; i <= maxd; i++) {
 		chartOptions.hAxis.ticks.push(i);
 	}
 
@@ -50,21 +74,11 @@ function drawChart() {
 
 }
 
-
-
-Array.prototype.remove = function(val) {
-	var idx = this.indexOf(val);
-	if (idx != -1) {
-		return this.splice(idx, 1);
-	}
-	return false;
-}
-
 var rand = function () {
 	//var vivaRand = Viva.random(123);
 	return Math.random();
 	//return vivaRand.nextDouble();
-}
+};
 
 var n = 10, k = 2 , p = 0;
 
@@ -84,8 +98,10 @@ var SmallWorld = (function () {
 
 	// Draw as ring network
 	layout.placeNode(function(node) {
+
 		var angle = ((node.id / n) * 360) * (Math.PI / 180);
 		return {x: (5 * n) * Math.cos(angle), y: (5 * n) * Math.sin(angle)};
+
 	});
 
 	// Circular nodes
@@ -93,36 +109,46 @@ var SmallWorld = (function () {
 
 		var ui = Viva.Graph.svg("circle").attr('r', 5).attr("fill", "#000").attr("d", node.id);
 
-		ui.addEventListener("mousedown", function(e) {
-			//console.log(SmallWorld.breadthFirstSearchDepth(0, node.id));
-			//console.log("mousedown node %o", node.id);
+		ui.addEventListener("mousedown", function() {
 			console.log("Node %o has degree %o", node.id, graph.getLinks(node.id).length);
 		});
 
-		ui.addEventListener("mouseover", function(e) {
-			var links = graph.getLinks(node.id);
-			for (var i = 0, linkUI; i < links.length; i++) {
+		ui.addEventListener("mouseover", function() {
+
+			var links = graph.getLinks(node.id),
+				linkUI,
+				i;
+
+			for (i = 0; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
 					linkUI.attr('stroke', 'red').attr('stroke-width', 2);
 					graphics.getNodeUI(links[i].toId).attr('fill', 'red');
 					graphics.getNodeUI(links[i].fromId).attr('fill', 'red');
 				}
-			};
-			graphics.getNodeUI(node.id).attr('fill', '#990000');	
+			}
+
+			graphics.getNodeUI(node.id).attr('fill', '#990000');
+
 		});
 
-		ui.addEventListener("mouseout", function(e) {
-			var links = graph.getLinks(node.id);
-			for (var i = 0, linkUI; i < links.length; i++) {
+		ui.addEventListener("mouseout", function() {
+
+			var links = graph.getLinks(node.id),
+				linkUI,
+				i;
+
+			for (i = 0; i < links.length; i++) {
 				linkUI = graphics.getLinkUI(links[i].id);
 				if (linkUI) {
 					linkUI.attr('stroke', '#999').attr('stroke-width', 1);
 					graphics.getNodeUI(links[i].toId).attr('fill', '#000');
 					graphics.getNodeUI(links[i].fromId).attr('fill', '#000');
 				}
-			};
+			}
+
 			graphics.getNodeUI(node.id).attr('fill', '#000');
+
 		});
 
 		return ui;
@@ -144,9 +170,15 @@ var SmallWorld = (function () {
 	}
 
 	function getDegrees() {
-		var degrees = {}, max = 0;
-		graph.forEachNode(function(node){
-			var degree = graph.getLinks(node.id).length;
+
+		var degrees = {},
+			degree,
+			max = 0,
+			i;
+
+		graph.forEachNode(function(node) {
+
+			degree = graph.getLinks(node.id).length;
 			if (degrees.hasOwnProperty(degree)) {
 				degrees[degree]++;
 			} else {
@@ -155,20 +187,37 @@ var SmallWorld = (function () {
 			if (degree > max) {
 				max = degree;
 			}
+
 		});
-		for (var i = 0; i < max; i++) {
+
+		for (i = 0; i < max; i++) {
 			if (!degrees.hasOwnProperty(i)) {
 				degrees[i] = 0;
 			}
 		}
+
 		return degrees;
+
 	}
 
 	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
-		var visitQueue = [], visited = [], depths = [], t;
-		var perf = window.performance;
-		var start = perf.now();
+		var visitQueue = [],
+			visited = [],
+			depths = [],
+			perf = window.performance,
+			start = perf.now(),
+			t;
+
+		function visitLinkedNode(node) {
+
+			if (visited.indexOf(node.id) === -1) {
+				visited.push(node.id);
+				depths.push(depths[visited.indexOf(t)] + 1);
+				visitQueue.push(node.id);
+			}
+
+		}
 
 		visitQueue.push(sourceNodeId);
 		visited.push(sourceNodeId);
@@ -177,190 +226,197 @@ var SmallWorld = (function () {
 		while (visitQueue.length > 0) {
 
 			t = visitQueue.shift();
-			if (t === targetNodeId) {
-				var end = perf.now();
-				return [depths[visited.indexOf(t)], end - start];
 
+			if (t === targetNodeId) {
+				return [depths[visited.indexOf(t)], perf.now() - start];
 			}
 
-			graph.forEachLinkedNode(t, function(linkedNode, link){
-
-				if (visited.indexOf(linkedNode.id) === -1) {
-					visited.push(linkedNode.id);
-					depths.push(depths[visited.indexOf(t)] + 1);
-					visitQueue.push(linkedNode.id);
-				}
-
-			});
+			graph.forEachLinkedNode(t, visitLinkedNode);
 
 		}
+
 		return [Number.MAX_VALUE, 0];
+
 	}
 
 	/*
-	*  Returns the lenght of the shorthest path between the source node and the destination node
+	*  Returns the length of the shortest path between the source node and the destination node
 	*  calculated using the Floyd–Warshall algorithm
-	*
-	*  @author Marius Popescu
 	*
 	*  @param Boolean allPaths - true if the method should return all a matrix will all the paths, false to return only the lenght of the required path
 	*  @param int sourceNodeId - starting node
 	*  @param int targetNodeId - destination node
-	*  @return [dist, steps]
+	*  @return [dist, runtime]
 	*/
-	function floydWarshall(sourceNodeId, targetNodeId, allPaths)
-	{
-		var INF = Number.MAX_VALUE;
-		var dist = []; 
-		var perf = window.performance;
-		var start = perf.now();
 
-		// Initialize the array of distances 
-		for(var i = 0; i < n; ++i)
-	    {
-	    	dist[i] = [];
+	function floydWarshall(sourceNodeId, targetNodeId, allPaths) {
 
-	    	// Initialize the path from node i to all the other nodes with INF
-	    	for (var j = 0; j < n; ++j)
-	    	{
-	    		dist[i][j] = INF;
-	    	}
-	    	
-	    	// For each neighbor initialize the size of the path
-	    	graph.forEachLinkedNode(i, function(linkedNode, link){
-				dist[i][linkedNode.id] = 1;
-			}); 
-	    }
+		var dist = [],
+			perf = window.performance,
+			start = perf.now(),
+			end,
+			i,
+			j,
+			k;
 
-	    // FloydWarshall
-		for (var k = 0; k < n; ++k)
-       		for(var i = 0; i < n; ++i)
-            	for(var j = 0; j < n; ++j)
-            	{
-                	dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
-            	}
-	    
-        var end = perf.now();
-	    // Return the right answer based on the allPaths paramter
-	    if (allPaths) 
-	    {
-	    	return [dist, end - start];
-	    }
-	    else 
-	    {
-	    	return [dist[sourceNodeId][targetNodeId], end - start];
-	    }
+		function initPathSize(linkedNode) {
+			dist[i][linkedNode.id] = 1;
+		}
+
+		// Initialise the array of distances 
+		for (i = 0; i < n; i++) {
+
+			dist[i] = [];
+
+			// Initialise the path from node i to all the other nodes with INF
+			for (j = 0; j < n; j++) {
+				dist[i][j] = Number.MAX_VALUE;
+			}
+
+			// For each neighbor initialize the size of the path
+			graph.forEachLinkedNode(i, initPathSize);
+
+		}
+
+		// FloydWarshall
+		for (k = 0; k < n; k++) {
+			for (i = 0; i < n; i++) {
+				for (j = 0; j < n; j++) {
+					dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+				}
+			}
+		}
+
+		end = perf.now();
+
+		// Return the right answer based on the allPaths paramter
+		if (allPaths) {
+			return [dist, end - start];
+		} else {
+			return [dist[sourceNodeId][targetNodeId], end - start];
+		}
 	}
 
-	function DijktraShortestPath(sourceNodeId, targetNodeId)
-	{
-		return Dijkstra(sourceNodeId)[targetNodeId];
+	function dijktraShortestPath(sourceNodeId, targetNodeId) {
+
+		return dijkstra(sourceNodeId)[targetNodeId];
+
 	}
-	function Dijkstra(sourceNodeId) {
-		var dist = [], previous = [], que = [];
-		var INF = Number.MAX_VALUE;
-		var perf = window.performance;
-		var start = perf.now();
-		for (var i = 0; i < n; i++) {
-			dist[i] = INF;
+
+	function dijkstra(sourceNodeId) {
+
+		var dist = [],
+			previous = [],
+			que = [],
+			perf = window.performance,
+			start = perf.now(),
+			i,
+			u,
+			alt;
+
+		function processNode(linkedNode) {
+			alt = dist[u] + 1;
+			if (alt < dist[linkedNode.id]) {
+				dist[linkedNode.id] = alt;
+				previous[linkedNode.id] = u;
+				que.splice(que.indexOf(linkedNode.id), 1);
+				que.unshift(linkedNode.id);
+			}
+		}
+
+		for (i = 0; i < n; i++) {
+			dist[i] = Number.MAX_VALUE;
 			previous[i] = -1;
 			que.push(i);
 		}
+
 		dist[sourceNodeId] = 0;
-		while(que.length > 0){
-			var u = getSmallestValueIndex(dist,que);
-			que.splice(que.indexOf(u),1);
-			if(dist[u] == INF){
+
+		while (que.length > 0) {
+
+			u = getSmallestValueIndex(dist, que);
+			que.splice(que.indexOf(u), 1);
+			if (dist[u] === Number.MAX_VALUE) {
 				break;
 			}
-			graph.forEachLinkedNode(u, function(linkedNode, link){
-				var alt = dist[u] + 1;
-				if(alt < dist[linkedNode.id]){
-					dist[linkedNode.id] = alt;
-					previous[linkedNode.id] = u;
-					que.splice(que.indexOf(linkedNode.id),1);
-					que.unshift(linkedNode.id);
-				}
-			}); 
+			graph.forEachLinkedNode(u, processNode);
+
 		}
+
+		return [dist, perf.now() - start];
+
+	}
+
+	function getSmallestValueIndex(valueArray, array) {
 		
-		var end = perf.now();
-		return [dist, end - start];
-	}
-	function printArray(array){
-		for(var i = 0; i < array.length; i++)
-			console.log(i + ": " + array[i]);
-	}
-	function getSmallestValueIndex(valueArray, array){
-		var smallest = array[0];
-		for(var i = 1; i < array.length; i++){
-			if(valueArray[array[i]] < valueArray[smallest])
+		var smallest = array[0],
+			i;
+
+		for (i = 1; i < array.length; i++) {
+			if (valueArray[array[i]] < valueArray[smallest]) {
 				smallest = array[i];
+			}
 		}
+
 		return smallest;
+
 	}
 
-	// mode = 'BFS' for Breadth First Search
-	// mode = "FW" for Floyd Warshall
-	// mode = "DJK" for Dijstrak
-	function averageGeodesicDistance(mode) {
+	function averageGeodesicDistance(algo) {
 
-		var sum = 0;
+		var sum = 0,
+			time = 0,
+			dist = 0,
+			dists,
+			result,
+			i,
+			j;
 
 		/*
 
 		L =         1
-		    ----------------  sum ( d(i,j) )   i =/= j
-		     0.5 N ( N - 1 )    i,j
+		    ----------------  sum() ( d(i,j) )   i =/= j
+		     0.5 N ( N - 1 )	i,j
 
 		*/
 
-
-		var dists;
-		var time = 0;
-		var result;
-		if (mode == 'FW')
-		{
-			result = floydWarshall(0,0,true);
+		if (algo === ShortestPathAlgo.FloydWarshall) {
+			result = floydWarshall(0, 0, true);
 			dists = result[0];
 			time = result[1];
 		}
 
-		var dist = 0;
-		var noOfEdges = 0;
-		for (var i = 0; i < n; i++) {
+		for (i = 0; i < n; i++) {
 
-			if (mode == "DJK")
-			{
-				result = Dijkstra(i);
+			if (algo === ShortestPathAlgo.Dijkstra) {
+				result = dijkstra(i);
 				dists = result[0];
 				time += result[1];
 			}
 
-			for (var j = i + 1; j < n; j++) {
-				
-				// Find shortest path between i and j
-				if (mode == 'BFS') {
-					 result = breadthFirstSearchDepth(i, j);
-					 dist = result[0];
-					 time += result[1];
-				}
-				else if (mode == "FW") {
-					dist = dists[i][j];
-				}
-				else if (mode == "DJK") {
-					dist = dists[j];
-				} 
+			for (j = i + 1; j < n; j++) {
 
-				if (dist == Number.MAX_VALUE)
+				// Find shortest path between i and j
+				if (algo === ShortestPathAlgo.BFS) {
+					result = breadthFirstSearchDepth(i, j);
+					dist = result[0];
+					time += result[1];
+				} else if (algo === ShortestPathAlgo.FloydWarshall) {
+					dist = dists[i][j];
+				} else if (algo === ShortestPathAlgo.Dijkstra) {
+					dist = dists[j];
+				}
+
+				if (dist === Number.MAX_VALUE) {
 					return [Infinity, Infinity];
-				
-				sum += dist;	
-				
+				}
+
+				sum += dist;
+
 			}
 		}
-		
-		sum *= 1 / (0.5 * n * (n-1));
+
+		sum *= 1 / (0.5 * n * (n - 1));
 
 		return [sum, time];
 
@@ -374,7 +430,7 @@ var SmallWorld = (function () {
 
 	}
 
- 	function clearLinks() {
+	function clearLinks() {
 
 		graph.forEachNode(function(node){
 			while (node.links.length) {
@@ -399,70 +455,115 @@ var SmallWorld = (function () {
 
 	function randomRewire() {
 
-		// Randomly rewire links...
-		rewires = 0;
-		for (var i = 0; i < n; i++) {
+		var i;
 
-			graph.forEachLinkedNode(i, function(linkedNode, link){
+		function rewire(linkedNode, link){
 
-				// ...with probability p...
-				if (rand() < p) {
+			var existingTargets,
+				possibleTargets;
 
-					rewires++;
+			// ...with probability p...
+			if (rand() < p) {
 
-					graph.removeLink(link);
+				rewires++;
 
-					// ...to a randomly chosen node
-					var existingTargets = graph.getLinks(i).map(function(link){return (link.fromId == i ? link.toId : link.fromId)});
-					var possibleTargets = nodeIDs.filter(function(id){return existingTargets.indexOf(id) < 0 && id != i});
+				graph.removeLink(link);
 
-					if (possibleTargets.length > 0) {
+				// ...to a randomly chosen node
+				existingTargets = graph.getLinks(i).map(function(link){
+					return (link.fromId === i ? link.toId : link.fromId);
+				});
+				possibleTargets = nodeIDs.filter(function(id){
+					return existingTargets.indexOf(id) < 0 && id !== i;
+				});
 
-						var target = possibleTargets[~~(Math.random() * possibleTargets.length)];
-						graph.addLink(i, target, true);
+				if (possibleTargets.length > 0) {
 
-					} else {
+					graph.addLink(i, possibleTargets[~~(Math.random() * possibleTargets.length)], true);
 
-						console.log('hmm...?');
+				} else {
 
-					}
+					console.log('hmm...?');
 
 				}
 
-			});
+			}
 
+		}
+
+		// Randomly rewire links...
+		rewires = 0;
+		for (i = 0; i < n; i++) {
+			graph.forEachLinkedNode(i, rewire);
 		}
 
 	}
 
 	function createLinks() {
 
-		document.body.className = "loading";
+		var i,
+			j,
+			target;
 
-		setTimeout(function(){
+		clearLinks();
 
-			clearLinks();
-
-			// Create a regular nearest-neighbour coupled network
-			for (var i = 0; i < n; i++) {
-				for (var j = 1, t; j <= (k/2); j++) {
-					var target = (i + j) % n;
-					if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
-						graph.addLink(i, target);
-					}
-					t = i - j;
-					target = t < 0 ? n + t : t;
-					if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
-						graph.addLink(i, target);
-					}
+		// Create a regular nearest-neighbour coupled network
+		for (i = 0; i < n; i++) {
+			for (j = 1; j <= (k/2); j++) {
+				target = (i + j) % n;
+				if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
+					graph.addLink(i, target);
+				}
+				target = i - j;
+				target = target < 0 ? n + target : target;
+				if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
+					graph.addLink(i, target);
 				}
 			}
+		}
 
-			randomRewire();
+		randomRewire();
 
-			document.body.className = "";
+	}
 
-		}, 1);
+	function clusteringCoefficient() {
+
+		var c = 0;
+
+		// Ci = 2 ( ei / ki ( ki - 1 ) )
+		// ki = degree of node i
+		// ei = number of links between the ki neighbours of node i
+
+		graph.forEachNode(function(fromNode){
+
+			var ki = fromNode.links.length,
+				ei = 0,
+				adjacentNodes = [],
+				i,
+				j;
+
+			if (ki > 1) {
+
+				// Get adjacent nodes
+				graph.forEachLinkedNode(fromNode.id, function(toNode) {
+					adjacentNodes.push(toNode.id);
+				});
+
+				for (i = 0; i < ki; i++) {
+					for (j = 0; j < ki; j++) {
+						if (graph.hasLink(adjacentNodes[i], adjacentNodes[j])) {
+							ei++;
+						}
+					}
+				}
+
+				c += 2 * ( ei / ( ki * (ki - 1)));
+
+			}
+			
+		});
+
+		return c / n;
 
 	}
 
@@ -500,29 +601,16 @@ var SmallWorld = (function () {
 		averageGeodesicDistance: averageGeodesicDistance,
 		breadthFirstSearchDepth: breadthFirstSearchDepth,
 		getDegrees: getDegrees,
-		DijktraShortestPath: DijktraShortestPath
+		dijktraShortestPath: dijktraShortestPath,
+		clusteringCoefficient: clusteringCoefficient
 	};
 
 })();
 
-var UI = {
-	pChanger: document.getElementById("pChanger"),
-	pVal: document.getElementById("pVal"),
-	nChanger: document.getElementById("nChanger"),
-	nVal: document.getElementById("nVal"),
-	kChanger: document.getElementById("kChanger"),
-	kVal: document.getElementById("kVal"),
-	edgesVal: document.getElementById("edgesVal"),
-	rewireVal: document.getElementById("rewireVal"),
-	degreeChart: document.getElementById("degreeChart"),
-	dijkstraLVal: document.getElementById("dijkstraLVal"),
-	bfsLVal: document.getElementById("bfsLVal"),
-	fwVal: document.getElementById("fwVal"),
-};
-
 function readHash() {
 
 	var hash = window.location.hash.replace("#", "");
+
 	if (hash !== "") {
 
 		hash = hash.split("|");
@@ -560,29 +648,17 @@ function readHash() {
 
 }
 
-function updateEdgeCount() {
-	setTimeout(function(){
-		UI.edgesVal.innerHTML = SmallWorld.edgeCount() + " edges";
-	});
-}
-
-function updateRewireCount() {
-	setTimeout(function(){
-		UI.rewireVal.innerHTML = SmallWorld.rewireCount() + " rewires";
-	});
-}
-
 function updateL() {
-	setTimeout(function(){
-		var result = SmallWorld.averageGeodesicDistance('DJK');
-		UI.dijkstraLVal.innerHTML = "Dijkstra L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
 
-		result = SmallWorld.averageGeodesicDistance('BFS');
-		UI.bfsLVal.innerHTML = "BFS L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
+	var result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.Dijkstra);
+	UI.dijkstraLVal.innerHTML = "Dijkstra: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
 
-		result = SmallWorld.averageGeodesicDistance('FW');
-		UI.fwVal.innerHTML = "FW L = " + result[0].toFixed(2) + " T = " + result[1].toFixed(3);
-	});
+	result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.BFS);
+	UI.bfsLVal.innerHTML = "BFS: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
+	result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.FloydWarshall);
+	UI.fwVal.innerHTML = "Floyd Warshall: = " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
 }
 
 function updateHash() {
@@ -605,19 +681,22 @@ function init() {
 	SmallWorld.init(n, k, p);
 
 	updateHash();
-	updateEdgeCount();
-	updateRewireCount();
+
+	UI.edgesVal.innerHTML = "Edges: " + SmallWorld.edgeCount();
+	UI.rewireVal.innerHTML = "Rewires: " + SmallWorld.rewireCount();
+
 	updateL();
+
+	UI.clusterVal.innerHTML = "Clustering coefficient: " + SmallWorld.clusteringCoefficient().toFixed(3);
+
+	drawChart();
 
 }
 
 UI.nChanger.addEventListener("change", function(e) {
 	var n = e.target.valueAsNumber;
 	UI.nVal.innerHTML = n;
-	updateEdgeCount();
-	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.nChanger.addEventListener("input", function(e) {
 	UI.nVal.innerHTML = e.target.valueAsNumber;
@@ -626,10 +705,7 @@ UI.nChanger.addEventListener("input", function(e) {
 UI.kChanger.addEventListener("change", function(e) {
 	var k = e.target.valueAsNumber;
 	UI.kVal.innerHTML = k;
-	updateEdgeCount();
-	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.kChanger.addEventListener("input", function(e) {
 	UI.kVal.innerHTML = e.target.valueAsNumber;
@@ -638,10 +714,7 @@ UI.kChanger.addEventListener("input", function(e) {
 UI.pChanger.addEventListener("change", function(e) {
 	var p = e.target.valueAsNumber;
 	UI.pVal.innerHTML = p;
-	updateEdgeCount();
-	updateRewireCount();
 	updateHash();
-	drawChart();
 });
 UI.pChanger.addEventListener("input", function(e) {
 	UI.pVal.innerHTML = e.target.valueAsNumber;
@@ -649,15 +722,11 @@ UI.pChanger.addEventListener("input", function(e) {
 
 document.body.addEventListener('keyup', function(e) {
 	if (e.which === 32) {
-		SmallWorld.createLinks();
-		updateRewireCount();
+		init();
 		drawChart();
-		updateL();
 	}
 });
 
 window.addEventListener("hashchange", function() {
 	init();
 }, false);
-
-init();

@@ -6,6 +6,7 @@
   </head>
   <body>
     <div id="controls">
+      <div class="boxTitle">Controls</div>
       <label for="nChanger" title="Number of nodes">n: </label>
       <input type="range" min="4" max="50" id="nChanger"><span id="nVal" class="val"></span>
       <label for="kChanger" title="Number of initial nearest-neighbour links">k: </label>
@@ -13,7 +14,12 @@
       <label for="pChanger" title="Probability of link rewiring">p: </label>
       <input type="range" min="0.0" max="1.0" step=".1" id="pChanger"><span id="pVal" class="val"></span>
     </div>
-    <div id="stats"><span id="edgesVal"></span><span id="rewireVal"></span><span id="dijkstraLVal"></span><span id="bfsLVal"></span><span id="fwVal"></span></div>
+    <div id="stats">
+      <div class="boxTitle">Stats</div><span id="edgesVal"></span><span id="rewireVal"></span><span id="clusterVal"></span>
+    </div>
+    <div id="avpathlength">
+      <div class="boxTitle">Average path length</div><span id="dijkstraLVal"></span><span id="bfsLVal"></span><span id="fwVal"></span>
+    </div>
     <p id="help">Press space to generate a new network</p>
     <div id="degreeChart" style="width: 300px; height: 300px;"></div>
     <script src="js/viva.min.js"></script>

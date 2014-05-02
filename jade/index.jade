@@ -5,6 +5,7 @@ html(lang="en")
     link(href="css/screen.css", rel="stylesheet")
   body
     div#controls
+      div.boxTitle= "Controls"
       label(for="nChanger", title="Number of nodes")= "n: "
       input(type="range", min="4", max="50" id="nChanger")
       span(id="nVal", class="val")
@@ -15,10 +16,15 @@ html(lang="en")
       input(type="range", min="0.0", max="1.0", step=".1", id="pChanger")
       span(id="pVal", class="val")
     div#stats
+      div.boxTitle= "Stats"
       span(id="edgesVal")
       span(id="rewireVal")
+      span(id="clusterVal")
+    div#avpathlength
+      div.boxTitle= "Average path length"
       span(id="dijkstraLVal")
       span(id="bfsLVal")
+      span(id="fwVal")
     p#help= "Press space to generate a new network"
     div#degreeChart(style="width: 300px; height: 300px;")
     script(src="js/viva.min.js")
