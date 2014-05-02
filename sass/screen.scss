@@ -94,6 +94,10 @@ body, svg {
 	@include border-top-right-radius(3px);
 }
 
+.desc {
+	font-size: 10px;
+}
+
 circle {
 	cursor: pointer;
 }

@@ -9,12 +9,17 @@ html(lang="en")
       label(for="nChanger", title="Number of nodes")= "n: "
       input(type="range", min="4", max="50" id="nChanger")
       span(id="nVal", class="val")
+      span(class="desc")= "Number of nodes"
+      hr
       label(for="kChanger", title="Number of initial nearest-neighbour links")= "k: "
       input(type="range", min="2", max="10" step="2" id="kChanger")
       span(id="kVal", class="val")
+      span(class="desc")= "Number of initial nearest-neighbour links"
+      hr
       label(for="pChanger", title="Probability of link rewiring")= "p: "
       input(type="range", min="0.0", max="1.0", step=".1", id="pChanger")
       span(id="pVal", class="val")
+      span(class="desc")= "Probability of link rewiring"
     div#stats
       div.boxTitle= "Stats"
       span(id="edgesVal")
@@ -25,7 +30,7 @@ html(lang="en")
       span(id="dijkstraLVal")
       span(id="bfsLVal")
       span(id="fwVal")
-    p#help= "Press space to generate a new network"
+    p#help= "Press space to generate a new network. Click two nodes to see the shortest path between them."
     div#degreeChart(style="width: 300px; height: 300px;")
     script(src="js/viva.min.js")
     script(src="https://www.google.com/jsapi")

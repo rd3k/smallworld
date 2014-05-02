@@ -8,11 +8,13 @@
     <div id="controls">
       <div class="boxTitle">Controls</div>
       <label for="nChanger" title="Number of nodes">n: </label>
-      <input type="range" min="4" max="50" id="nChanger"><span id="nVal" class="val"></span>
+      <input type="range" min="4" max="50" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
+      <hr>
       <label for="kChanger" title="Number of initial nearest-neighbour links">k: </label>
-      <input type="range" min="2" max="10" step="2" id="kChanger"><span id="kVal" class="val"></span>
+      <input type="range" min="2" max="10" step="2" id="kChanger"><span id="kVal" class="val"></span><span class="desc">Number of initial nearest-neighbour links</span>
+      <hr>
       <label for="pChanger" title="Probability of link rewiring">p: </label>
-      <input type="range" min="0.0" max="1.0" step=".1" id="pChanger"><span id="pVal" class="val"></span>
+      <input type="range" min="0.0" max="1.0" step=".1" id="pChanger"><span id="pVal" class="val"></span><span class="desc">Probability of link rewiring</span>
     </div>
     <div id="stats">
       <div class="boxTitle">Stats</div><span id="edgesVal"></span><span id="rewireVal"></span><span id="clusterVal"></span>
@@ -20,7 +22,7 @@
     <div id="avpathlength">
       <div class="boxTitle">Average path length</div><span id="dijkstraLVal"></span><span id="bfsLVal"></span><span id="fwVal"></span>
     </div>
-    <p id="help">Press space to generate a new network</p>
+    <p id="help">Press space to generate a new network. Click two nodes to see the shortest path between them.</p>
     <div id="degreeChart" style="width: 300px; height: 300px;"></div>
     <script src="js/viva.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
