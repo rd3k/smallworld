@@ -657,7 +657,7 @@ function updateL() {
 	UI.bfsLVal.innerHTML = "BFS: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
 
 	result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.FloydWarshall);
-	UI.fwVal.innerHTML = "Floyd Warshall: = " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+	UI.fwVal.innerHTML = "Floyd Warshall: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
 
 }
 
