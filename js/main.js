@@ -816,11 +816,15 @@ var SmallWorld = (function () {
 			}
 
 			if (algo === SmallWorldAlgo.NewmannWatts) {
-				UI.nwAlgo.checked = true;
-				nwCheck();
+				if (UI.nwAlgo.checked !== true) {
+					UI.nwAlgo.checked = true;
+					nwCheck();
+				}
 			} else {
-				UI.wsAlgo.checked = true;
-				wsCheck();
+				if (UI.wsAlgo.checked !== true) {
+					UI.wsAlgo.checked = true;
+					wsCheck();
+				}
 			}
 
 			if (isNaN(n)) {

@@ -7,8 +7,10 @@
   <body>
     <div id="controls">
       <div class="boxTitle">Controls</div>
-      <input type="radio" name="algo" id="wsAlgo"><span> Watts-Strogatz</span><br><span class="desc">Random link rewiring</span><br><br>
-      <input type="radio" name="algo" id="nwAlgo"><span> Newmann-Watts</span><br><span class="desc">Random link addition</span>
+      <input type="radio" name="algo" id="wsAlgo">
+      <label for="wsAlgo" class="algo"> Watts-Strogatz</label><br><span class="desc">Random link rewiring</span><br>
+      <input type="radio" name="algo" id="nwAlgo">
+      <label for="nwAlgo" class="algo"> Newmann-Watts</label><br><span class="desc">Random link addition</span>
       <hr>
       <label for="nChanger">n: </label>
       <input type="range" min="4" max="30" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>

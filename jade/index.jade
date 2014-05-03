@@ -7,13 +7,12 @@ html(lang="en")
     div#controls
       div.boxTitle= "Controls"
       input(type="radio" name="algo" id="wsAlgo")
-      span()= " Watts-Strogatz"
+      label(for="wsAlgo" class="algo")= " Watts-Strogatz"
       br
       span(class="desc")= "Random link rewiring"
       br
-      br
       input(type="radio" name="algo" id="nwAlgo")
-      span()= " Newmann-Watts"
+      label(for="nwAlgo" class="algo")= " Newmann-Watts"
       br
       span(class="desc")= "Random link addition"
       hr

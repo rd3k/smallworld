@@ -46,6 +46,11 @@ body, svg {
 		display: inline-block;
 		line-height: 30px;
 	}
+
+	label.algo {
+		width: 130px;
+		text-align: left;
+	}
 }
 
 #stats {
@@ -113,6 +118,8 @@ body, svg {
 
 .desc {
 	font-size: 10px;
+	display: block;
+	margin-top: 6px;
 }
 
 circle {
