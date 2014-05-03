@@ -9,9 +9,9 @@
       <div id="controls">
         <div class="boxTitle">Controls</div>
         <input type="radio" name="algo" id="wsAlgo">
-        <label for="wsAlgo" class="algo"> Watts-Strogatz</label><br><span class="desc">Random link rewiring</span><br>
+        <label for="wsAlgo" class="algo"> Watts-Strogatz</label><span class="desc">Random link rewiring</span>
         <input type="radio" name="algo" id="nwAlgo">
-        <label for="nwAlgo" class="algo"> Newmann-Watts</label><br><span class="desc">Random link addition</span>
+        <label for="nwAlgo" class="algo"> Newmann-Watts</label><span class="desc">Random link addition</span>
         <hr>
         <label for="nChanger">n: </label>
         <input type="range" min="4" max="30" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
@@ -39,7 +39,7 @@
       </div>
     </aside>
     <p id="help">Press space to generate a new network. Click two nodes to see the shortest path between them.</p>
-    <div id="degreeChart" style="width: 300px; height: 300px;"></div>
+    <div id="degreeChart"></div>
     <script src="js/viva.min.js"></script>
     <script src="js/rng.min.js"></script>
     <script src="js/randomness.js"></script>

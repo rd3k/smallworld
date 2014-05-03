@@ -10,8 +10,8 @@ var randomness = (function() {
 		return s.substr(2, 4 + Math.floor(Math.random() * (s.length - 4)));
 	}
 
-	function init() {
-		rng = new RNG(seed = randomSeed());
+	function init(s) {
+		rng = new RNG(seed = (s ? s : randomSeed()));
 	}
 
 	function reset() {

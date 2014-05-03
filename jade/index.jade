@@ -9,12 +9,9 @@ html(lang="en")
         div.boxTitle= "Controls"
         input(type="radio" name="algo" id="wsAlgo")
         label(for="wsAlgo" class="algo")= " Watts-Strogatz"
-        br
         span(class="desc")= "Random link rewiring"
-        br
         input(type="radio" name="algo" id="nwAlgo")
         label(for="nwAlgo" class="algo")= " Newmann-Watts"
-        br
         span(class="desc")= "Random link addition"
         hr
         label(for="nChanger")= "n: "
@@ -54,7 +51,7 @@ html(lang="en")
         span(id="seedVal")
         pan(class="desc")= "Pseudo-random number generator seed"
     p#help= "Press space to generate a new network. Click two nodes to see the shortest path between them."
-    div#degreeChart(style="width: 300px; height: 300px;")
+    div#degreeChart()
     script(src="js/viva.min.js")
     script(src="js/rng.min.js")
     script(src="js/randomness.js")

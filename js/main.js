@@ -39,12 +39,14 @@ var SmallWorld = (function () {
 
 	var chartOptions = {
 			legend: {"position": "none"},
-			width: 300,
+			width: 380,
+			height: 300,
+			fontSize: 9,
 			backgroundColor: { fill: "transparent" },
 			colors: ["#444"],
 			vAxis: {ticks: [], title: "Number of nodes"},
-			hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
-			chartArea: {left:30, top:30, width: 260, height: 220}
+			hAxis: {title: "Degree", tickshowTextEvery: 1, maxAlternation: 1, minTextSpacing: 0, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
+			chartArea: {left:30, top:30, width: 340, height: 220}
 		};
 
 	function drawChart() {
@@ -806,13 +808,14 @@ var SmallWorld = (function () {
 		if (hash !== "") {
 
 			hash = hash.split("_");
-			if (hash.length >= 4) {
-				algo = parseInt(hash[0]);
-				n = parseInt(hash[1]);
-				k = parseInt(hash[2]);
-				p = parseFloat(hash[3]);
-				if (hash.length === 5) {
-					s = parseInt(hash[4]);
+			if (hash.length >= 5) {
+				randomness.init(hash[0]);
+				algo = parseInt(hash[1]);
+				n = parseInt(hash[2]);
+				k = parseInt(hash[3]);
+				p = parseFloat(hash[4]);
+				if (hash.length === 6) {
+					s = parseInt(hash[5]);
 				}
 			}
 
@@ -879,7 +882,7 @@ var SmallWorld = (function () {
 
 	function updateHash() {
 
-		var newHash = algo + "_" + UI.nVal.innerHTML + "_" + UI.kVal.innerHTML + "_" + UI.pVal.innerHTML;
+		var newHash = randomness.seed + "_" + algo + "_" + UI.nVal.innerHTML + "_" + UI.kVal.innerHTML + "_" + UI.pVal.innerHTML;
 
 		if (algo === SmallWorldAlgo.NewmannWatts) {
 			newHash += "_" + UI.sVal.innerHTML;
@@ -982,6 +985,7 @@ var SmallWorld = (function () {
 	document.body.addEventListener("keyup", function(e) {
 		if (e.which === 32) {
 			randomness.init();
+			updateHash();
 			if (p > 0) {
 				init();
 			}
