@@ -90,7 +90,7 @@ var SmallWorld = (function () {
 		renderer = Viva.Graph.View.renderer(graph, {
 			layout: layout,
 			graphics : graphics,
-			interactive: true
+			interactive: false
 		}),
 		algo,
 		n,
