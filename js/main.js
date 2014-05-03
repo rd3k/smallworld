@@ -1,937 +1,987 @@
-"use strict";
-
-google.load("visualization", "1", {packages:["corechart"], callback: init});
-
-var ShortestPathAlgo = {};
-ShortestPathAlgo[ShortestPathAlgo.Dijkstra = 0] = "Dijkstra";
-ShortestPathAlgo[ShortestPathAlgo.BFS = 1] = "BFS";
-ShortestPathAlgo[ShortestPathAlgo.FloydWarshall = 2] = "FloydWarshall";
-
-var SmallWorldAlgo = {};
-SmallWorldAlgo[SmallWorldAlgo.WattsStrogatz = 0] = "WattsStrogatz";
-SmallWorldAlgo[SmallWorldAlgo.NewmannWatts = 1] = "NewmannWatts";
-
-var UI = {
-	pChanger: document.getElementById("pChanger"),
-	pVal: document.getElementById("pVal"),
-	pType: document.getElementById("pType"),
-	nChanger: document.getElementById("nChanger"),
-	nVal: document.getElementById("nVal"),
-	kChanger: document.getElementById("kChanger"),
-	kVal: document.getElementById("kVal"),
-	sChanger: document.getElementById("sChanger"),
-	sVal: document.getElementById("sVal"),
-	steps: document.getElementById("steps"),
-	edgesVal: document.getElementById("edgesVal"),
-	rewireVal: document.getElementById("rewireVal"),
-	degreeChart: document.getElementById("degreeChart"),
-	dijkstraLVal: document.getElementById("dijkstraLVal"),
-	bfsLVal: document.getElementById("bfsLVal"),
-	fwVal: document.getElementById("fwVal"),
-	clusterVal: document.getElementById("clusterVal"),
-	wsAlgo: document.getElementById("wsAlgo"),
-	nwAlgo: document.getElementById("nwAlgo")
-};
-
-var chartOptions = {
-		legend: {"position": "none"},
-		width: 300,
-		backgroundColor: { fill: "transparent" },
-		colors: ["#444"],
-		vAxis: {ticks: [], title: "Number of nodes"},
-		hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: 'transparent', gridlines: {color: 'transparent'}, minorGridlines: {count: 0}, slantedText: false},
-		chartArea: {left:30, top:30, width: 260, height: 220}
-	};
-
-function drawChart() {
-
-	var chartData = [['Degree', 'Quantity']],
-		degrees = SmallWorld.getDegrees(),
-		chart = new google.visualization.ColumnChart(UI.degreeChart),
-		maxq = 0,
-		maxd = 0,
-		data,
-		i,
-		d;
-
-	for (d in degrees) {
-		chartData.push([d, degrees[d]]);
-		if (degrees[d] > maxq) {
-			maxq = degrees[d];
-		}
-		if (d > maxd) {
-			maxd = d;
-		}
-	}
-
-	data = google.visualization.arrayToDataTable(chartData);
-
-	chartOptions.vAxis.ticks = [];
-	for (i = 0; i <= maxq; i++) {
-		chartOptions.vAxis.ticks.push(i);
-	}
-
-	chartOptions.hAxis.ticks = [];
-	for (i = 0; i <= maxd; i++) {
-		chartOptions.hAxis.ticks.push(i);
-	}
-
-	chart.draw(data, chartOptions);
-
-}
-
-var n = 10, k = 2 , p = 0, s = 1, algo = SmallWorldAlgo.WattsStrogatz;
-
 var SmallWorld = (function () {
 
-	var graph = Viva.Graph.graph(),
-		layout = Viva.Graph.Layout.constant(graph),
-		graphics = Viva.Graph.View.svgGraphics(),
-		renderer = Viva.Graph.View.renderer(graph, {
-			layout: layout,
-			graphics : graphics,
-			interactive: false
-		}),
-		algo,
-		n,
-		k,
-		p,
-		s,
-		rewires = 0,
-		nodeIDs = [],
-		hoverHighlight = false,
-		highlightedLinkUI = [],
-		highlightedNodeUI = [],
-		pathFrom = null,
-		pathTo = null;
+   'use strict';
 
-	// Draw as ring network
-	layout.placeNode(function(node) {
+	google.load("visualization", "1", {packages:["corechart"], callback: init});
 
-		var angle = ((node.id / n) * 360) * (Math.PI / 180);
-		return {x: (8 * n) * Math.cos(angle), y: (8 * n) * Math.sin(angle)};
+	var ShortestPathAlgo = {};
+	ShortestPathAlgo[ShortestPathAlgo.Dijkstra = 0] = "Dijkstra";
+	ShortestPathAlgo[ShortestPathAlgo.BFS = 1] = "BFS";
+	ShortestPathAlgo[ShortestPathAlgo.FloydWarshall = 2] = "FloydWarshall";
 
-	});
+	var SmallWorldAlgo = {};
+	SmallWorldAlgo[SmallWorldAlgo.WattsStrogatz = 0] = "WattsStrogatz";
+	SmallWorldAlgo[SmallWorldAlgo.NewmannWatts = 1] = "NewmannWatts";
 
-	// Circular nodes
-	graphics.node(function(node) {
+	var UI = {
+		pChanger: document.getElementById("pChanger"),
+		pVal: document.getElementById("pVal"),
+		pType: document.getElementById("pType"),
+		nChanger: document.getElementById("nChanger"),
+		nVal: document.getElementById("nVal"),
+		kChanger: document.getElementById("kChanger"),
+		kVal: document.getElementById("kVal"),
+		sChanger: document.getElementById("sChanger"),
+		sVal: document.getElementById("sVal"),
+		steps: document.getElementById("steps"),
+		edgesVal: document.getElementById("edgesVal"),
+		componentsVal: document.getElementById("componentsVal"),
+		rewireVal: document.getElementById("rewireVal"),
+		degreeChart: document.getElementById("degreeChart"),
+		dijkstraLVal: document.getElementById("dijkstraLVal"),
+		bfsLVal: document.getElementById("bfsLVal"),
+		fwVal: document.getElementById("fwVal"),
+		clusterVal: document.getElementById("clusterVal"),
+		wsAlgo: document.getElementById("wsAlgo"),
+		nwAlgo: document.getElementById("nwAlgo")
+	};
 
-		var ui = Viva.Graph.svg("circle").attr('r', 5).attr("fill", "#000").attr("d", node.id);
+	var chartOptions = {
+			legend: {"position": "none"},
+			width: 300,
+			backgroundColor: { fill: "transparent" },
+			colors: ["#444"],
+			vAxis: {ticks: [], title: "Number of nodes"},
+			hAxis: {title: "Degree", tickshowTextEvery: 1, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
+			chartArea: {left:30, top:30, width: 260, height: 220}
+		};
 
-		ui.addEventListener("mousedown", function() {
+	function drawChart() {
 
-			var path,
-				link,
-				nodeUI,
-				linkUI,
-				i;
+		var chartData = [["Degree", "Quantity"]],
+			degrees = SmallWorld.getDegrees(),
+			chart = new google.visualization.ColumnChart(UI.degreeChart),
+			maxq = 0,
+			maxd = 0,
+			data,
+			i,
+			d;
 
-			console.log("Node %o has degree %o", node.id, graph.getLinks(node.id).length);
+		for (d in degrees) {
+			chartData.push([d, degrees[d]]);
+			if (degrees[d] > maxq) {
+				maxq = degrees[d];
+			}
+			if (d > maxd) {
+				maxd = d;
+			}
+		}
 
-			if (pathFrom === null) {
+		data = google.visualization.arrayToDataTable(chartData);
 
-				pathFrom = node.id;
+		chartOptions.vAxis.ticks = [];
+		for (i = 0; i <= maxq; i++) {
+			chartOptions.vAxis.ticks.push(i);
+		}
 
-				clearHighlight();
+		chartOptions.hAxis.ticks = [];
+		for (i = 0; i <= maxd; i++) {
+			chartOptions.hAxis.ticks.push(i);
+		}
 
-				nodeUI = graphics.getNodeUI(pathFrom);
-				nodeUI.attr('fill', 'red');
-				highlightedNodeUI.push(nodeUI);
+		chart.draw(data, chartOptions);
 
-			} else {
+	}
 
-				pathTo = node.id;
+	var n = 10, k = 2 , p = 0, s = 1, algo = SmallWorldAlgo.WattsStrogatz;
 
-				path = dijktraShortestPath(pathFrom, pathTo)[1];
+	var SmallWorld = (function () {
 
-				if (path.length === 1) {
+		var graph = Viva.Graph.graph(),
+			layout = Viva.Graph.Layout.constant(graph),
+			graphics = Viva.Graph.View.svgGraphics(),
+			renderer = Viva.Graph.View.renderer(graph, {
+				layout: layout,
+				graphics : graphics,
+				interactive: false
+			}),
+			algo,
+			n,
+			k,
+			p,
+			s,
+			rewires = 0,
+			nodeIDs = [],
+			hoverHighlight = false,
+			highlightedLinkUI = [],
+			highlightedNodeUI = [],
+			pathFrom = null,
+			pathTo = null;
+
+		// Draw as ring network
+		layout.placeNode(function(node) {
+
+			var angle = ((node.id / n) * 360) * (Math.PI / 180);
+			return {x: (8 * n) * Math.cos(angle), y: (8 * n) * Math.sin(angle)};
+
+		});
+
+		// Circular nodes
+		graphics.node(function(node) {
+
+			var ui = Viva.Graph.svg("circle").attr("r", 5).attr("fill", "#000").attr("d", node.id);
+
+			ui.addEventListener("mousedown", function() {
+
+				var path,
+					link,
+					nodeUI,
+					linkUI,
+					i;
+
+				console.log("Node %o has degree %o", node.id, graph.getLinks(node.id).length);
+
+				if (pathFrom === null) {
+
+					pathFrom = node.id;
 
 					clearHighlight();
-					console.log("Unreachable");
+
+					nodeUI = graphics.getNodeUI(pathFrom);
+					nodeUI.attr("fill", "red");
+					highlightedNodeUI.push(nodeUI);
 
 				} else {
 
-					nodeUI = graphics.getNodeUI(path[0]);
-					nodeUI.attr('fill', 'red');
-					highlightedNodeUI.push(nodeUI);
+					pathTo = node.id;
 
-					for (i = 0; i < path.length - 1; i++) {
-						link = graph.hasLink(path[i], path[i + 1]);
-						if (!link) {
-							link = graph.hasLink(path[i + 1], path[i]);
+					path = dijktraShortestPath(pathFrom, pathTo)[1];
+
+					if (path.length === 1) {
+
+						clearHighlight();
+						console.log("Unreachable");
+
+					} else {
+
+						nodeUI = graphics.getNodeUI(path[0]);
+						nodeUI.attr("fill", "red");
+						highlightedNodeUI.push(nodeUI);
+
+						for (i = 0; i < path.length - 1; i++) {
+							link = graph.hasLink(path[i], path[i + 1]);
+							if (!link) {
+								link = graph.hasLink(path[i + 1], path[i]);
+							}
+							linkUI = graphics.getLinkUI(link.id);
+							highlightedLinkUI.push(linkUI);
+							linkUI.attr("stroke", "red").attr("stroke-width", 2);
 						}
-						linkUI = graphics.getLinkUI(link.id);
+
+					}
+
+					pathFrom = null;
+					pathTo = null;
+
+				}
+
+			});
+
+			ui.addEventListener("mouseover", function() {
+
+				if (!hoverHighlight) {
+					return;
+				}
+
+				var links = graph.getLinks(node.id),
+					linkUI,
+					fromUI,
+					toUI,
+					i;
+
+				for (i = 0; i < links.length; i++) {
+
+					linkUI = graphics.getLinkUI(links[i].id);
+
+					if (linkUI) {
+
 						highlightedLinkUI.push(linkUI);
-						linkUI.attr('stroke', 'red').attr('stroke-width', 2);
+						linkUI.attr("stroke", "red").attr("stroke-width", 2);
+
+						toUI = graphics.getNodeUI(links[i].toId);
+						toUI.attr("fill", "red");
+						highlightedNodeUI.push(toUI);
+
+						fromUI = graphics.getNodeUI(links[i].fromId);
+						fromUI.attr("fill", "red");
+						highlightedNodeUI.push(fromUI);
+
 					}
 
 				}
 
-				pathFrom = null;
-				pathTo = null;
+				fromUI = graphics.getNodeUI(node.id);
+				fromUI.attr("fill", "#990000");
+				highlightedNodeUI.push(fromUI);
 
-			}
+			});
+
+			ui.addEventListener("mouseout", function() {
+
+				if (hoverHighlight) {
+					clearHighlight();
+				}
+
+			});
+
+			return ui;
+
+		}).placeNode(function(nodeUI, pos){
+
+			nodeUI.attr("cx", pos.x).attr("cy", pos.y);
 
 		});
 
-		ui.addEventListener("mouseover", function() {
+		function init(algoVal, nVal, kVal, pVal, sVal) {
 
-			if (!hoverHighlight) {
-				return;
+			algo = algoVal;
+			n = nVal;
+			k = kVal;
+			p = pVal;
+			s = sVal;
+			highlightedLinkUI = [];
+			highlightedNodeUI = [];
+			pathFrom = null;
+			pathTo = null;
+			renderer.run();
+			create();
+
+		}
+
+		function clearHighlight() {
+
+			for (var i = 0; i < highlightedNodeUI.length; i++) {
+				highlightedNodeUI[i].attr("fill", "#000");
 			}
 
-			var links = graph.getLinks(node.id),
-				linkUI,
-				fromUI,
-				toUI,
+			highlightedNodeUI = [];
+
+			for (i = 0; i < highlightedLinkUI.length; i++) {
+				highlightedLinkUI[i].attr("stroke", "#999").attr("stroke-width", 1);
+			}
+
+			highlightedLinkUI = [];
+
+		}
+
+		function getDegrees() {
+
+			var degrees = {},
+				degree,
+				max = 0,
 				i;
 
-			for (i = 0; i < links.length; i++) {
+			graph.forEachNode(function(node) {
 
-				linkUI = graphics.getLinkUI(links[i].id);
+				degree = graph.getLinks(node.id).length;
+				if (degrees.hasOwnProperty(degree)) {
+					degrees[degree]++;
+				} else {
+					degrees[degree] = 1;
+				}
+				if (degree > max) {
+					max = degree;
+				}
 
-				if (linkUI) {
+			});
 
-					highlightedLinkUI.push(linkUI);
-					linkUI.attr('stroke', 'red').attr('stroke-width', 2);
+			for (i = 0; i < max; i++) {
+				if (!degrees.hasOwnProperty(i)) {
+					degrees[i] = 0;
+				}
+			}
 
-					toUI = graphics.getNodeUI(links[i].toId);
-					toUI.attr('fill', 'red');
-					highlightedNodeUI.push(toUI);
+			return degrees;
 
-					fromUI = graphics.getNodeUI(links[i].fromId);
-					fromUI.attr('fill', 'red');
-					highlightedNodeUI.push(fromUI);
+		}
 
+		// Similar to breadthFirstSearchDepth... 
+		function reachable(sourceNodeId) {
+
+			var visitQueue = [],
+				visited = [];
+
+			function visitLinkedNode(node) {
+
+				if (visited.indexOf(node.id) === -1) {
+					visited.push(node.id);
+					visitQueue.push(node.id);
 				}
 
 			}
 
-			fromUI = graphics.getNodeUI(node.id);
-			fromUI.attr('fill', '#990000');
-			highlightedNodeUI.push(fromUI);
+			visitQueue.push(sourceNodeId);
+			visited.push(sourceNodeId);
 
-		});
-
-		ui.addEventListener("mouseout", function() {
-
-			if (hoverHighlight) {
-				clearHighlight();
+			while (visitQueue.length > 0) {
+				graph.forEachLinkedNode(visitQueue.shift(), visitLinkedNode);
 			}
 
-		});
-
-		return ui;
-
-	}).placeNode(function(nodeUI, pos){
-
-		nodeUI.attr("cx", pos.x).attr("cy", pos.y);
-
-	});
-
-	function init(algoVal, nVal, kVal, pVal, sVal) {
-
-		algo = algoVal;
-		n = nVal;
-		k = kVal;
-		p = pVal;
-		s = sVal;
-		highlightedLinkUI = [];
-		highlightedNodeUI = [];
-		pathFrom = null;
-		pathTo = null;
-		renderer.run();
-		create();
-
-	}
-
-	function clearHighlight() {
-
-		for (var i = 0; i < highlightedNodeUI.length; i++) {
-			highlightedNodeUI[i].attr('fill', '#000');
-		}
-
-		highlightedNodeUI = [];
-
-		for (i = 0; i < highlightedLinkUI.length; i++) {
-			highlightedLinkUI[i].attr('stroke', '#999').attr('stroke-width', 1);
-		}
-
-		highlightedLinkUI = [];
-
-	}
-
-	function getDegrees() {
-
-		var degrees = {},
-			degree,
-			max = 0,
-			i;
-
-		graph.forEachNode(function(node) {
-
-			degree = graph.getLinks(node.id).length;
-			if (degrees.hasOwnProperty(degree)) {
-				degrees[degree]++;
-			} else {
-				degrees[degree] = 1;
-			}
-			if (degree > max) {
-				max = degree;
-			}
-
-		});
-
-		for (i = 0; i < max; i++) {
-			if (!degrees.hasOwnProperty(i)) {
-				degrees[i] = 0;
-			}
-		}
-
-		return degrees;
-
-	}
-
-	function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
-
-		var visitQueue = [],
-			visited = [],
-			depths = [],
-			perf = window.performance,
-			start = perf.now(),
-			t;
-
-		function visitLinkedNode(node) {
-
-			if (visited.indexOf(node.id) === -1) {
-				visited.push(node.id);
-				depths.push(depths[visited.indexOf(t)] + 1);
-				visitQueue.push(node.id);
-			}
+			return visited;
 
 		}
 
-		visitQueue.push(sourceNodeId);
-		visited.push(sourceNodeId);
-		depths.push(0);
+		function breadthFirstSearchDepth(sourceNodeId, targetNodeId) {
 
-		while (visitQueue.length > 0) {
+			var visitQueue = [],
+				visited = [],
+				depths = [],
+				perf = window.performance,
+				start = perf.now(),
+				t;
 
-			t = visitQueue.shift();
+			function visitLinkedNode(node) {
 
-			if (t === targetNodeId) {
-				return [depths[visited.indexOf(t)], perf.now() - start];
-			}
-
-			graph.forEachLinkedNode(t, visitLinkedNode);
-
-		}
-
-		return [Number.MAX_VALUE, 0];
-
-	}
-
-	/*
-	*  Returns the length of the shortest path between the source node and the destination node
-	*  calculated using the Floyd–Warshall algorithm
-	*
-	*  @param Boolean allPaths - true if the method should return all a matrix will all the paths, false to return only the lenght of the required path
-	*  @param int sourceNodeId - starting node
-	*  @param int targetNodeId - destination node
-	*  @return [dist, runtime]
-	*/
-
-	function floydWarshall(sourceNodeId, targetNodeId, allPaths) {
-
-		var dist = [],
-			perf = window.performance,
-			start = perf.now(),
-			end,
-			i,
-			j,
-			k;
-
-		function initPathSize(linkedNode) {
-			dist[i][linkedNode.id] = 1;
-		}
-
-		// Initialise the array of distances 
-		for (i = 0; i < n; i++) {
-
-			dist[i] = [];
-
-			// Initialise the path from node i to all the other nodes with INF
-			for (j = 0; j < n; j++) {
-				dist[i][j] = Number.MAX_VALUE;
-			}
-
-			// For each neighbor initialize the size of the path
-			graph.forEachLinkedNode(i, initPathSize);
-
-		}
-
-		// FloydWarshall
-		for (k = 0; k < n; k++) {
-			for (i = 0; i < n; i++) {
-				for (j = 0; j < n; j++) {
-					dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+				if (visited.indexOf(node.id) === -1) {
+					visited.push(node.id);
+					depths.push(depths[visited.indexOf(t)] + 1);
+					visitQueue.push(node.id);
 				}
+
 			}
-		}
 
-		end = perf.now();
+			visitQueue.push(sourceNodeId);
+			visited.push(sourceNodeId);
+			depths.push(0);
 
-		// Return the right answer based on the allPaths paramter
-		if (allPaths) {
-			return [dist, end - start];
-		} else {
-			return [dist[sourceNodeId][targetNodeId], end - start];
-		}
-	}
+			while (visitQueue.length > 0) {
 
-	function dijktraShortestPath(sourceNodeId, targetNodeId) {
+				t = visitQueue.shift();
 
-		var result = dijkstra(sourceNodeId),
-			path = [],
-			u = targetNodeId;
+				if (t === targetNodeId) {
+					return [depths[visited.indexOf(t)], perf.now() - start];
+				}
 
-		if (result[0] === Number.MAX_VALUE) {
-			return [result, []];
-		}
+				graph.forEachLinkedNode(t, visitLinkedNode);
 
-		while (result[2][u] !== -1) {
-			path.push(u);
-			u = result[2][u];
-		}
-
-		path.push(sourceNodeId);
-
-		return [result, path];
-
-	}
-
-	function dijkstra(sourceNodeId) {
-
-		var dist = [],
-			previous = [],
-			que = [],
-			perf = window.performance,
-			start = perf.now(),
-			i,
-			u,
-			alt;
-
-		function processNode(linkedNode) {
-			alt = dist[u] + 1;
-			if (alt < dist[linkedNode.id]) {
-				dist[linkedNode.id] = alt;
-				previous[linkedNode.id] = u;
-				que.splice(que.indexOf(linkedNode.id), 1);
-				que.unshift(linkedNode.id);
 			}
-		}
 
-		for (i = 0; i < n; i++) {
-			dist[i] = Number.MAX_VALUE;
-			previous[i] = -1;
-			que.push(i);
-		}
-
-		dist[sourceNodeId] = 0;
-
-		while (que.length > 0) {
-
-			u = getSmallestValueIndex(dist, que);
-			que.splice(que.indexOf(u), 1);
-			if (dist[u] === Number.MAX_VALUE) {
-				break;
-			}
-			graph.forEachLinkedNode(u, processNode);
+			return [Number.MAX_VALUE, 0];
 
 		}
-
-		return [dist, perf.now() - start, previous];
-
-	}
-
-	function getSmallestValueIndex(valueArray, array) {
-		
-		var smallest = array[0],
-			i;
-
-		for (i = 1; i < array.length; i++) {
-			if (valueArray[array[i]] < valueArray[smallest]) {
-				smallest = array[i];
-			}
-		}
-
-		return smallest;
-
-	}
-
-	function averageGeodesicDistance(algo) {
-
-		var sum = 0,
-			time = 0,
-			dist = 0,
-			dists,
-			result,
-			i,
-			j;
 
 		/*
-
-		L =         1
-		    ----------------  sum() ( d(i,j) )   i =/= j
-		     0.5 N ( N - 1 )	i,j
-
+		*  Returns the length of the shortest path between the source node and the destination node
+		*  calculated using the Floyd–Warshall algorithm
+		*
+		*  @param Boolean allPaths - true if the method should return all a matrix will all the paths, false to return only the lenght of the required path
+		*  @param int sourceNodeId - starting node
+		*  @param int targetNodeId - destination node
+		*  @return [dist, runtime]
 		*/
 
-		if (algo === ShortestPathAlgo.FloydWarshall) {
-			result = floydWarshall(0, 0, true);
-			dists = result[0];
-			time = result[1];
-		}
+		function floydWarshall(sourceNodeId, targetNodeId, allPaths) {
 
-		for (i = 0; i < n; i++) {
+			var dist = [],
+				perf = window.performance,
+				start = perf.now(),
+				end,
+				i,
+				j,
+				k;
 
-			if (algo === ShortestPathAlgo.Dijkstra) {
-				result = dijkstra(i);
-				dists = result[0];
-				time += result[1];
+			function initPathSize(linkedNode) {
+				dist[i][linkedNode.id] = 1;
 			}
 
-			for (j = i + 1; j < n; j++) {
+			// Initialise the array of distances 
+			for (i = 0; i < n; i++) {
 
-				// Find shortest path between i and j
-				if (algo === ShortestPathAlgo.BFS) {
-					result = breadthFirstSearchDepth(i, j);
-					dist = result[0];
-					time += result[1];
-				} else if (algo === ShortestPathAlgo.FloydWarshall) {
-					dist = dists[i][j];
-				} else if (algo === ShortestPathAlgo.Dijkstra) {
-					dist = dists[j];
+				dist[i] = [];
+
+				// Initialise the path from node i to all the other nodes with INF
+				for (j = 0; j < n; j++) {
+					dist[i][j] = Number.MAX_VALUE;
 				}
 
-				if (dist === Number.MAX_VALUE) {
-					return [Infinity, time];
-				}
-
-				sum += dist;
-
-			}
-		}
-
-		sum *= 1 / (0.5 * n * (n - 1));
-
-		return [sum, time];
-
-	}
-
-	function create() {
-
-		createNodes();
-		createLinks();
-		renderer.reset();
-
-	}
-
-	function clearLinks() {
-
-		graph.forEachNode(function(node){
-			while (node.links.length) {
-				graph.removeLink(node.links[0]);
-			}
-		});
-
-	}
-
-	function createNodes() {
-
-		// Remove all nodes and links
-		graph.clear();
-		nodeIDs = [];
-
-		for (var i = 0; i < n; i++) {
-			graph.addNode(i);
-			nodeIDs.push(i);
-		}
-
-	}
-
-	function randomRewire() {
-
-		var i;
-
-		function rewire(linkedNode, link){
-
-			var existingTargets,
-				possibleTargets;
-
-			// ...with probability p...
-			if (Math.random() < p) {
-
-				rewires++;
-
-				graph.removeLink(link);
-
-				// ...to a randomly chosen node
-				existingTargets = graph.getLinks(i).map(function(link){
-					return (link.fromId === i ? link.toId : link.fromId);
-				});
-				possibleTargets = nodeIDs.filter(function(id){
-					return existingTargets.indexOf(id) < 0 && id !== i;
-				});
-
-				if (possibleTargets.length > 0) {
-
-					graph.addLink(i, possibleTargets[~~(Math.random() * possibleTargets.length)], true);
-
-				} else {
-
-					console.log('hmm...?');
-
-				}
+				// For each neighbor initialize the size of the path
+				graph.forEachLinkedNode(i, initPathSize);
 
 			}
 
-		}
-
-		// Randomly rewire links...
-		rewires = 0;
-		for (i = 0; i < n; i++) {
-			graph.forEachLinkedNode(i, rewire);
-		}
-
-	}
-
-	function addRandomLinks(quantity) {
-
-		var i,
-			j,
-			m,
-			possible = [];
-
-		for (i = 0; i < n; i++) {
-			for (j = i + 1; j < n; j++) {
-				if (!graph.hasLink(i, j) && !(graph.hasLink(j, i))) {
-					possible.push([i, j]);
+			// FloydWarshall
+			for (k = 0; k < n; k++) {
+				for (i = 0; i < n; i++) {
+					for (j = 0; j < n; j++) {
+						dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+					}
 				}
 			}
-		}
 
-		m = Math.min(possible.length, quantity);
+			end = perf.now();
 
-		possible.sort(function() {
-			return 0.5 - Math.random();
-		});
-
-		for (i = 0; i < m; i++) {
-
-			// ...with probability p...
-			if (Math.random() < p) {
-				graph.addLink(possible[i][0], possible[i][1]);
-			}
-
-		}
-
-	}
-
-	function createLinks() {
-
-		var i,
-			j,
-			target;
-
-		clearLinks();
-
-		// Create a regular nearest-neighbour coupled network
-		for (i = 0; i < n; i++) {
-			for (j = 1; j <= (k/2); j++) {
-				target = (i + j) % n;
-				if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
-					graph.addLink(i, target);
-				}
-				target = i - j;
-				target = target < 0 ? n + target : target;
-				if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
-					graph.addLink(i, target);
-				}
+			// Return the right answer based on the allPaths paramter
+			if (allPaths) {
+				return [dist, end - start];
+			} else {
+				return [dist[sourceNodeId][targetNodeId], end - start];
 			}
 		}
 
-		if (algo === SmallWorldAlgo.WattsStrogatz) {
-			randomRewire();
-		} else {
-			addRandomLinks(s);
+		function dijktraShortestPath(sourceNodeId, targetNodeId) {
+
+			var result = dijkstra(sourceNodeId),
+				path = [],
+				u = targetNodeId;
+
+			if (result[0] === Number.MAX_VALUE) {
+				return [result, []];
+			}
+
+			while (result[2][u] !== -1) {
+				path.push(u);
+				u = result[2][u];
+			}
+
+			path.push(sourceNodeId);
+
+			return [result, path];
+
 		}
 
-		
+		function dijkstra(sourceNodeId) {
 
-	}
+			var dist = [],
+				previous = [],
+				que = [],
+				perf = window.performance,
+				start = perf.now(),
+				i,
+				u,
+				alt;
 
-	function clusteringCoefficient() {
+			function processNode(linkedNode) {
+				alt = dist[u] + 1;
+				if (alt < dist[linkedNode.id]) {
+					dist[linkedNode.id] = alt;
+					previous[linkedNode.id] = u;
+					que.splice(que.indexOf(linkedNode.id), 1);
+					que.unshift(linkedNode.id);
+				}
+			}
 
-		var c = 0;
+			for (i = 0; i < n; i++) {
+				dist[i] = Number.MAX_VALUE;
+				previous[i] = -1;
+				que.push(i);
+			}
 
-		// Ci = 2 ( ei / ki ( ki - 1 ) )
-		// ki = degree of node i
-		// ei = number of links between the ki neighbours of node i
+			dist[sourceNodeId] = 0;
 
-		graph.forEachNode(function(fromNode){
+			while (que.length > 0) {
 
-			var ki = fromNode.links.length,
-				ei = 0,
-				adjacentNodes = [],
+				u = getSmallestValueIndex(dist, que);
+				que.splice(que.indexOf(u), 1);
+				if (dist[u] === Number.MAX_VALUE) {
+					break;
+				}
+				graph.forEachLinkedNode(u, processNode);
+
+			}
+
+			return [dist, perf.now() - start, previous];
+
+		}
+
+		function getSmallestValueIndex(valueArray, array) {
+			
+			var smallest = array[0],
+				i;
+
+			for (i = 1; i < array.length; i++) {
+				if (valueArray[array[i]] < valueArray[smallest]) {
+					smallest = array[i];
+				}
+			}
+
+			return smallest;
+
+		}
+
+		function averageGeodesicDistance(algo) {
+
+			var sum = 0,
+				time = 0,
+				dist = 0,
+				dists,
+				result,
 				i,
 				j;
 
-			if (ki > 1) {
+			// L = 1 / 0.5 N ( N - 1 )   sum( d(i,j) )   i =/= j
 
-				// Get adjacent nodes
-				graph.forEachLinkedNode(fromNode.id, function(toNode) {
-					adjacentNodes.push(toNode.id);
-				});
+			if (algo === ShortestPathAlgo.FloydWarshall) {
+				result = floydWarshall(0, 0, true);
+				dists = result[0];
+				time = result[1];
+			}
 
-				for (i = 0; i < ki; i++) {
-					for (j = 0; j < ki; j++) {
-						if (graph.hasLink(adjacentNodes[i], adjacentNodes[j])) {
-							ei++;
-						}
-					}
+			for (i = 0; i < n; i++) {
+
+				if (algo === ShortestPathAlgo.Dijkstra) {
+					result = dijkstra(i);
+					dists = result[0];
+					time += result[1];
 				}
 
-				c += 2 * ( ei / ( ki * (ki - 1)));
+				for (j = i + 1; j < n; j++) {
 
+					// Find shortest path between i and j
+					if (algo === ShortestPathAlgo.BFS) {
+						result = breadthFirstSearchDepth(i, j);
+						dist = result[0];
+						time += result[1];
+					} else if (algo === ShortestPathAlgo.FloydWarshall) {
+						dist = dists[i][j];
+					} else if (algo === ShortestPathAlgo.Dijkstra) {
+						dist = dists[j];
+					}
+
+					if (dist === Number.MAX_VALUE) {
+						return [Infinity, time];
+					}
+
+					sum += dist;
+
+				}
 			}
-			
-		});
 
-		return c / n;
+			sum *= 1 / (0.5 * n * (n - 1));
 
-	}
+			return [sum, time];
 
-	function setN(val) {
-		n = val;
-		create();
-	}
-
-	function setK(val) {
-		k = val;
-		create();
-	}
-
-	function setP(val) {
-		p = val;
-		createLinks();
-	}
-
-	function edgeCount() {
-		return graph.getLinksCount();
-	}
-
-	function rewireCount() {
-		return rewires;
-	}
-
-	return {
-		init: init,
-		createLinks: createLinks,
-		setN: setN,
-		setK: setK,
-		setP: setP,
-		edgeCount: edgeCount,
-		rewireCount: rewireCount,
-		averageGeodesicDistance: averageGeodesicDistance,
-		breadthFirstSearchDepth: breadthFirstSearchDepth,
-		getDegrees: getDegrees,
-		dijktraShortestPath: dijktraShortestPath,
-		clusteringCoefficient: clusteringCoefficient,
-		addRandomLinks: addRandomLinks
-	};
-
-})();
-
-function readHash() {
-
-	var hash = window.location.hash.replace("#", "");
-
-	if (hash !== "") {
-
-		hash = hash.split("_");
-		if (hash.length >= 4) {
-			algo = parseInt(hash[0]);
-			n = parseInt(hash[1]);
-			k = parseInt(hash[2]);
-			p = parseFloat(hash[3]);
-			if (hash.length == 5) {
-				s = parseInt(hash[4]);
-			}
 		}
+
+		function create() {
+
+			createNodes();
+			createLinks();
+			renderer.reset();
+
+		}
+
+		function clearLinks() {
+
+			graph.forEachNode(function(node){
+				while (node.links.length) {
+					graph.removeLink(node.links[0]);
+				}
+			});
+
+		}
+
+		function createNodes() {
+
+			// Remove all nodes and links
+			graph.clear();
+			nodeIDs = [];
+
+			for (var i = 0; i < n; i++) {
+				graph.addNode(i);
+				nodeIDs.push(i);
+			}
+
+		}
+
+		function randomRewire() {
+
+			var i;
+
+			function rewire(linkedNode, link){
+
+				var existingTargets,
+					possibleTargets;
+
+				// ...with probability p...
+				if (Math.random() < p) {
+
+					rewires++;
+
+					graph.removeLink(link);
+
+					// ...to a randomly chosen node
+					existingTargets = graph.getLinks(i).map(function(link){
+						return (link.fromId === i ? link.toId : link.fromId);
+					});
+					possibleTargets = nodeIDs.filter(function(id){
+						return existingTargets.indexOf(id) < 0 && id !== i;
+					});
+
+					if (possibleTargets.length > 0) {
+
+						graph.addLink(i, possibleTargets[~~(Math.random() * possibleTargets.length)], true);
+
+					} else {
+
+						console.log("hmm...?");
+
+					}
+
+				}
+
+			}
+
+			// Randomly rewire links...
+			rewires = 0;
+			for (i = 0; i < n; i++) {
+				graph.forEachLinkedNode(i, rewire);
+			}
+
+		}
+
+		function addRandomLinks(quantity) {
+
+			var i,
+				j,
+				m,
+				possible = [];
+
+			for (i = 0; i < n; i++) {
+				for (j = i + 1; j < n; j++) {
+					if (!graph.hasLink(i, j) && !(graph.hasLink(j, i))) {
+						possible.push([i, j]);
+					}
+				}
+			}
+
+			m = Math.min(possible.length, quantity);
+
+			possible.sort(function() {
+				return 0.5 - Math.random();
+			});
+
+			for (i = 0; i < m; i++) {
+
+				// ...with probability p...
+				if (Math.random() < p) {
+					graph.addLink(possible[i][0], possible[i][1]);
+				}
+
+			}
+
+		}
+
+		function createLinks() {
+
+			var i,
+				j,
+				target;
+
+			clearLinks();
+
+			// Create a regular nearest-neighbour coupled network
+			for (i = 0; i < n; i++) {
+				for (j = 1; j <= (k/2); j++) {
+					target = (i + j) % n;
+					if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
+						graph.addLink(i, target);
+					}
+					target = i - j;
+					target = target < 0 ? n + target : target;
+					if (i !== target && graph.hasLink(i, target) === null && graph.hasLink(target, i) === null) {
+						graph.addLink(i, target);
+					}
+				}
+			}
+
+			if (algo === SmallWorldAlgo.WattsStrogatz) {
+				randomRewire();
+			} else {
+				addRandomLinks(s);
+			}
+
+			
+
+		}
+
+		function clusteringCoefficient() {
+
+			var c = 0;
+
+			// Ci = 2 ( ei / ki ( ki - 1 ) )
+			// ki = degree of node i
+			// ei = number of links between the ki neighbours of node i
+
+			graph.forEachNode(function(fromNode){
+
+				var ki = fromNode.links.length,
+					ei = 0,
+					adjacentNodes = [],
+					i,
+					j;
+
+				if (ki > 1) {
+
+					// Get adjacent nodes
+					graph.forEachLinkedNode(fromNode.id, function(toNode) {
+						adjacentNodes.push(toNode.id);
+					});
+
+					for (i = 0; i < ki; i++) {
+						for (j = 0; j < ki; j++) {
+							if (graph.hasLink(adjacentNodes[i], adjacentNodes[j])) {
+								ei++;
+							}
+						}
+					}
+
+					c += 2 * ( ei / ( ki * (ki - 1)));
+
+				}
+				
+			});
+
+			return c / n;
+
+		}
+
+		function componentCount() {
+
+			var count = 0,
+				visited = [],
+				i;
+
+			// BFS from each un-visited node
+			for (i = 0; i < n; i++) {
+				if (visited.indexOf(i) === -1) {
+					count++;
+					visited = visited.concat(reachable(i));
+				}
+			}
+
+			visited.length = 0;
+
+			return count;
+
+		}
+
+		function setN(val) {
+			n = val;
+			create();
+		}
+
+		function setK(val) {
+			k = val;
+			create();
+		}
+
+		function setP(val) {
+			p = val;
+			createLinks();
+		}
+
+		function edgeCount() {
+			return graph.getLinksCount();
+		}
+
+		function rewireCount() {
+			return rewires;
+		}
+
+		return {
+			init: init,
+			createLinks: createLinks,
+			setN: setN,
+			setK: setK,
+			setP: setP,
+			edgeCount: edgeCount,
+			rewireCount: rewireCount,
+			averageGeodesicDistance: averageGeodesicDistance,
+			breadthFirstSearchDepth: breadthFirstSearchDepth,
+			getDegrees: getDegrees,
+			dijktraShortestPath: dijktraShortestPath,
+			clusteringCoefficient: clusteringCoefficient,
+			addRandomLinks: addRandomLinks,
+			reachable: reachable,
+			componentCount: componentCount
+		};
+
+	})();
+
+	function readHash() {
+
+		var hash = window.location.hash.replace("#", "");
+
+		if (hash !== "") {
+
+			hash = hash.split("_");
+			if (hash.length >= 4) {
+				algo = parseInt(hash[0]);
+				n = parseInt(hash[1]);
+				k = parseInt(hash[2]);
+				p = parseFloat(hash[3]);
+				if (hash.length === 5) {
+					s = parseInt(hash[4]);
+				}
+			}
+
+			if (algo === SmallWorldAlgo.NewmannWatts) {
+				UI.nwAlgo.checked = true;
+				nwCheck();
+			} else {
+				UI.wsAlgo.checked = true;
+				wsCheck();
+			}
+
+			if (isNaN(n)) {
+				n = 10;
+			} else if (n < +UI.nChanger.min) {
+				n = +UI.nChanger.min;
+			} else if (n > +UI.nChanger.max) {
+				n = +UI.nChanger.max;
+			}
+
+			if (isNaN(k)) {
+				k = 2;
+			} else if (k < +UI.kChanger.min) {
+				k = +UI.kChanger.min;
+			} else if (k > +UI.kChanger.max) {
+				k = +UI.kChanger.max;
+			}
+
+			if (isNaN(p)) {
+				p = 0;
+			} else if (p < +UI.pChanger.min) {
+				p = +UI.pChanger.min;
+			} else if (p > +UI.pChanger.max) {
+				p = +UI.pChanger.max;
+			}
+
+			if (isNaN(s)) {
+				s = 1;
+			} else if (s < +UI.sChanger.min) {
+				s = +UI.sChanger.min;
+			} else if (s > +UI.sChanger.max) {
+				s = +UI.sChanger.max;
+			}
+
+		}
+
+	}
+
+	function updateL() {
+
+		var result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.Dijkstra);
+		UI.dijkstraLVal.innerHTML = "Dijkstra: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
+		result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.BFS);
+		UI.bfsLVal.innerHTML = "BFS: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
+		result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.FloydWarshall);
+		UI.fwVal.innerHTML = "Floyd Warshall: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
+	}
+
+	function updateHash() {
+
+		var newHash = algo + "_" + UI.nVal.innerHTML + "_" + UI.kVal.innerHTML + "_" + UI.pVal.innerHTML;
 
 		if (algo === SmallWorldAlgo.NewmannWatts) {
-			UI.nwAlgo.checked = true;
-			nwCheck();
-		} else {
-			UI.wsAlgo.checked = true;
-			wsCheck();
+			newHash += "_" + UI.sVal.innerHTML;
 		}
 
-		if (isNaN(n)) {
-			n = 10;
-		} else if (n < +UI.nChanger.min) {
-			n = +UI.nChanger.min;
-		} else if (n > +UI.nChanger.max) {
-			n = +UI.nChanger.max;
-		}
-
-		if (isNaN(k)) {
-			k = 2;
-		} else if (k < +UI.kChanger.min) {
-			k = +UI.kChanger.min;
-		} else if (k > +UI.kChanger.max) {
-			k = +UI.kChanger.max;
-		}
-
-		if (isNaN(p)) {
-			p = 0;
-		} else if (p < +UI.pChanger.min) {
-			p = +UI.pChanger.min;
-		} else if (p > +UI.pChanger.max) {
-			p = +UI.pChanger.max;
-		}
-
-		if (isNaN(s)) {
-			s = 1;
-		} else if (s < +UI.sChanger.min) {
-			s = +UI.sChanger.min;
-		} else if (s > +UI.sChanger.max) {
-			s = +UI.sChanger.max;
-		}
+		window.location.hash = newHash;
 
 	}
 
-}
+	function init() {
 
-function updateL() {
+		readHash();
 
-	var result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.Dijkstra);
-	UI.dijkstraLVal.innerHTML = "Dijkstra: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+		UI.nVal.innerHTML = n;
+		UI.nChanger.value = n;
 
-	result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.BFS);
-	UI.bfsLVal.innerHTML = "BFS: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+		UI.kVal.innerHTML = k;
+		UI.kChanger.value = k;
 
-	result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.FloydWarshall);
-	UI.fwVal.innerHTML = "Floyd Warshall: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+		UI.pVal.innerHTML = p;
+		UI.pChanger.value = p;
 
-}
+		UI.sVal.innerHTML = s;
+		UI.sChanger.value = s;
 
-function updateHash() {
+		SmallWorld.init(algo, n, k, p, s);
 
-	var newHash = algo + "_" + UI.nVal.innerHTML + "_" + UI.kVal.innerHTML + "_" + UI.pVal.innerHTML;
+		updateHash();
 
-	if (algo === SmallWorldAlgo.NewmannWatts) {
-		newHash += "_" + UI.sVal.innerHTML;
+		UI.edgesVal.innerHTML = "Edges: " + SmallWorld.edgeCount();
+		UI.componentsVal.innerHTML = "Components: " + SmallWorld.componentCount();
+		UI.rewireVal.innerHTML = "Rewires: " + SmallWorld.rewireCount();
+
+		updateL();
+
+		UI.clusterVal.innerHTML = "Clustering coefficient: " + SmallWorld.clusteringCoefficient().toFixed(3);
+
+		drawChart();
+
 	}
 
-	window.location.hash = newHash;
+	UI.nChanger.addEventListener("change", function(e) {
+		var n = e.target.valueAsNumber;
+		UI.nVal.innerHTML = n;
+		updateHash();
+	});
+	UI.nChanger.addEventListener("input", function(e) {
+		UI.nVal.innerHTML = e.target.valueAsNumber;
+	});
 
-}
+	UI.kChanger.addEventListener("change", function(e) {
+		var k = e.target.valueAsNumber;
+		UI.kVal.innerHTML = k;
+		updateHash();
+	});
+	UI.kChanger.addEventListener("input", function(e) {
+		UI.kVal.innerHTML = e.target.valueAsNumber;
+	});
 
-function init() {
+	UI.pChanger.addEventListener("change", function(e) {
+		var p = e.target.valueAsNumber;
+		UI.pVal.innerHTML = p;
+		updateHash();
+	});
+	UI.pChanger.addEventListener("input", function(e) {
+		UI.pVal.innerHTML = e.target.valueAsNumber;
+	});
 
-	readHash();
+	UI.sChanger.addEventListener("change", function(e) {
+		var s = e.target.valueAsNumber;
+		UI.sVal.innerHTML = s;
+		updateHash();
+	});
+	UI.sChanger.addEventListener("input", function(e) {
+		UI.sVal.innerHTML = e.target.valueAsNumber;
+	});
 
-	UI.nVal.innerHTML = n;
-	UI.nChanger.value = n;
+	UI.wsAlgo.addEventListener("change", wsCheck);
 
-	UI.kVal.innerHTML = k;
-	UI.kChanger.value = k;
+	function wsCheck() {
+		UI.pType.innerHTML = "rewiring";
+		UI.steps.className = "";
+		UI.rewireVal.className = "visible";
+		algo = SmallWorldAlgo.WattsStrogatz;
+		updateHash();
+	}
 
-	UI.pVal.innerHTML = p;
-	UI.pChanger.value = p;
+	UI.nwAlgo.addEventListener("change", nwCheck);
 
-	UI.sVal.innerHTML = s;
-	UI.sChanger.value = s;
+	function nwCheck() {
+		UI.pType.innerHTML = "addition";
+		UI.steps.className = "visible";
+		UI.rewireVal.className = "";
+		algo = SmallWorldAlgo.NewmannWatts;
+		updateHash();
+	}
 
-	SmallWorld.init(algo, n, k, p, s);
+	document.body.addEventListener("keyup", function(e) {
+		if (e.which === 32 && p > 0) {
+			init();
+		}
+	});
 
-	updateHash();
-
-	UI.edgesVal.innerHTML = "Edges: " + SmallWorld.edgeCount();
-	UI.rewireVal.innerHTML = "Rewires: " + SmallWorld.rewireCount();
-
-	updateL();
-
-	UI.clusterVal.innerHTML = "Clustering coefficient: " + SmallWorld.clusteringCoefficient().toFixed(3);
-
-	drawChart();
-
-}
-
-UI.nChanger.addEventListener("change", function(e) {
-	var n = e.target.valueAsNumber;
-	UI.nVal.innerHTML = n;
-	updateHash();
-});
-UI.nChanger.addEventListener("input", function(e) {
-	UI.nVal.innerHTML = e.target.valueAsNumber;
-});
-
-UI.kChanger.addEventListener("change", function(e) {
-	var k = e.target.valueAsNumber;
-	UI.kVal.innerHTML = k;
-	updateHash();
-});
-UI.kChanger.addEventListener("input", function(e) {
-	UI.kVal.innerHTML = e.target.valueAsNumber;
-});
-
-UI.pChanger.addEventListener("change", function(e) {
-	var p = e.target.valueAsNumber;
-	UI.pVal.innerHTML = p;
-	updateHash();
-});
-UI.pChanger.addEventListener("input", function(e) {
-	UI.pVal.innerHTML = e.target.valueAsNumber;
-});
-
-UI.sChanger.addEventListener("change", function(e) {
-	var s = e.target.valueAsNumber;
-	UI.sVal.innerHTML = s;
-	updateHash();
-});
-UI.sChanger.addEventListener("input", function(e) {
-	UI.sVal.innerHTML = e.target.valueAsNumber;
-});
-
-UI.wsAlgo.addEventListener("change", wsCheck);
-
-function wsCheck() {
-	UI.pType.innerHTML = "rewiring";
-	UI.steps.className = "";
-	UI.rewireVal.className = "visible";
-	algo = SmallWorldAlgo.WattsStrogatz;
-	updateHash();
-}
-
-UI.nwAlgo.addEventListener("change", nwCheck);
-
-function nwCheck() {
-	UI.pType.innerHTML = "addition";
-	UI.steps.className = "visible";
-	UI.rewireVal.className = "";
-	algo = SmallWorldAlgo.NewmannWatts;
-	updateHash();
-}
-
-document.body.addEventListener('keyup', function(e) {
-	if (e.which === 32 && p > 0) {
+	window.addEventListener("hashchange", function() {
 		init();
-	}
-});
+	}, false);
 
-window.addEventListener("hashchange", function() {
-	init();
-}, false);
+	return SmallWorld;
+
+}());
