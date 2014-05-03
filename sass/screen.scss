@@ -33,13 +33,13 @@ body, svg {
 	margin: 8px;
 	padding: 8px;
 	text-align: center;
+	background: #eee;
 	border: 1px #bbb solid;
 	@include border-radius(6px);
 }
 
 #controls {
 	@extend .box;
-	background: #eee;
 
 	label, span.val {
 		width: 30px;
@@ -50,23 +50,40 @@ body, svg {
 
 #stats {
 	@extend .box;
-	background: #ccc;
 
 	span {
 		display: block;
 		font-size: 11px;
 		line-height: 30px;
 	}
+
+	#rewireVal {
+		display: none;
+		
+		&.visible {
+			display: block;
+		}
+
+	}
+
 }
 
 #avpathlength {
 	@extend .box;
-	background: #ddd;
 
 	span {
 		display: block;
 		font-size: 11px;
 		line-height: 30px;
+	}
+
+}
+
+#steps {
+	display: none;
+	
+	&.visible {
+		display: block;
 	}
 
 }

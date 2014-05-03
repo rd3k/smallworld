@@ -6,20 +6,38 @@ html(lang="en")
   body
     div#controls
       div.boxTitle= "Controls"
-      label(for="nChanger", title="Number of nodes")= "n: "
-      input(type="range", min="4", max="50" id="nChanger")
+      input(type="radio" name="algo" id="wsAlgo")
+      span()= " Watts-Strogatz"
+      br
+      span(class="desc")= "Random link rewiring"
+      br
+      br
+      input(type="radio" name="algo" id="nwAlgo")
+      span()= " Newmann-Watts"
+      br
+      span(class="desc")= "Random link addition"
+      hr
+      label(for="nChanger")= "n: "
+      input(type="range", min="4", max="30" id="nChanger")
       span(id="nVal", class="val")
       span(class="desc")= "Number of nodes"
       hr
-      label(for="kChanger", title="Number of initial nearest-neighbour links")= "k: "
+      label(for="kChanger")= "k: "
       input(type="range", min="2", max="10" step="2" id="kChanger")
       span(id="kVal", class="val")
       span(class="desc")= "Number of initial nearest-neighbour links"
       hr
-      label(for="pChanger", title="Probability of link rewiring")= "p: "
+      label(for="pChanger")= "p: "
       input(type="range", min="0.0", max="1.0", step=".1", id="pChanger")
       span(id="pVal", class="val")
-      span(class="desc")= "Probability of link rewiring"
+      span(class="desc")= "Probability of link "
+        span(id="pType")= "rewiring"
+      div#steps
+        hr
+        label(for="sChanger")= "s: "
+        input(type="range", min="0", max="400", id="sChanger")
+        span(id="sVal", class="val")= "0"
+        span(class="desc")= "Number of link addition steps"
     div#stats
       div.boxTitle= "Stats"
       span(id="edgesVal")

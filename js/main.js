@@ -3,28 +3,34 @@
 google.load("visualization", "1", {packages:["corechart"], callback: init});
 
 var ShortestPathAlgo = {};
-ShortestPathAlgo[ShortestPathAlgo["Dijkstra"] = 0] = "Dijkstra";
-ShortestPathAlgo[ShortestPathAlgo["BFS"] = 1] = "BFS";
-ShortestPathAlgo[ShortestPathAlgo["FloydWarshall"] = 2] = "FloydWarshall";
+ShortestPathAlgo[ShortestPathAlgo.Dijkstra = 0] = "Dijkstra";
+ShortestPathAlgo[ShortestPathAlgo.BFS = 1] = "BFS";
+ShortestPathAlgo[ShortestPathAlgo.FloydWarshall = 2] = "FloydWarshall";
 
 var SmallWorldAlgo = {};
-SmallWorldAlgo[SmallWorldAlgo["WattsStrogatz"] = 0] = "WattsStrogatz";
-SmallWorldAlgo[SmallWorldAlgo["NewmannWatts"] = 1] = "NewmannWatts";
+SmallWorldAlgo[SmallWorldAlgo.WattsStrogatz = 0] = "WattsStrogatz";
+SmallWorldAlgo[SmallWorldAlgo.NewmannWatts = 1] = "NewmannWatts";
 
 var UI = {
 	pChanger: document.getElementById("pChanger"),
 	pVal: document.getElementById("pVal"),
+	pType: document.getElementById("pType"),
 	nChanger: document.getElementById("nChanger"),
 	nVal: document.getElementById("nVal"),
 	kChanger: document.getElementById("kChanger"),
 	kVal: document.getElementById("kVal"),
+	sChanger: document.getElementById("sChanger"),
+	sVal: document.getElementById("sVal"),
+	steps: document.getElementById("steps"),
 	edgesVal: document.getElementById("edgesVal"),
 	rewireVal: document.getElementById("rewireVal"),
 	degreeChart: document.getElementById("degreeChart"),
 	dijkstraLVal: document.getElementById("dijkstraLVal"),
 	bfsLVal: document.getElementById("bfsLVal"),
 	fwVal: document.getElementById("fwVal"),
-	clusterVal: document.getElementById("clusterVal")
+	clusterVal: document.getElementById("clusterVal"),
+	wsAlgo: document.getElementById("wsAlgo"),
+	nwAlgo: document.getElementById("nwAlgo")
 };
 
 var chartOptions = {
@@ -74,13 +80,7 @@ function drawChart() {
 
 }
 
-var rand = function () {
-	//var vivaRand = Viva.random(123);
-	return Math.random();
-	//return vivaRand.nextDouble();
-};
-
-var n = 10, k = 2 , p = 0;
+var n = 10, k = 2 , p = 0, s = 1, algo = SmallWorldAlgo.WattsStrogatz;
 
 var SmallWorld = (function () {
 
@@ -92,7 +92,11 @@ var SmallWorld = (function () {
 			graphics : graphics,
 			interactive: false
 		}),
-		n, k, p,
+		algo,
+		n,
+		k,
+		p,
+		s,
 		rewires = 0,
 		nodeIDs = [],
 		hoverHighlight = false,
@@ -105,7 +109,7 @@ var SmallWorld = (function () {
 	layout.placeNode(function(node) {
 
 		var angle = ((node.id / n) * 360) * (Math.PI / 180);
-		return {x: (5 * n) * Math.cos(angle), y: (5 * n) * Math.sin(angle)};
+		return {x: (8 * n) * Math.cos(angle), y: (8 * n) * Math.sin(angle)};
 
 	});
 
@@ -140,18 +144,12 @@ var SmallWorld = (function () {
 
 				path = dijktraShortestPath(pathFrom, pathTo)[1];
 
-				if (path.length == 1) {
+				if (path.length === 1) {
 
 					clearHighlight();
 					console.log("Unreachable");
 
 				} else {
-
-					/*for (i = 0; i < path.length; i++) {
-						nodeUI = graphics.getNodeUI(path[i]);
-						nodeUI.attr('fill', 'blue');
-						highlightedNodeUI.push(nodeUI);
-					}*/
 
 					nodeUI = graphics.getNodeUI(path[0]);
 					nodeUI.attr('fill', 'red');
@@ -231,11 +229,13 @@ var SmallWorld = (function () {
 
 	});
 
-	function init(nVal, kVal, pVal) {
+	function init(algoVal, nVal, kVal, pVal, sVal) {
 
+		algo = algoVal;
 		n = nVal;
 		k = kVal;
 		p = pVal;
+		s = sVal;
 		highlightedLinkUI = [];
 		highlightedNodeUI = [];
 		pathFrom = null;
@@ -253,7 +253,7 @@ var SmallWorld = (function () {
 
 		highlightedNodeUI = [];
 
-		for (var i = 0; i < highlightedLinkUI.length; i++) {
+		for (i = 0; i < highlightedLinkUI.length; i++) {
 			highlightedLinkUI[i].attr('stroke', '#999').attr('stroke-width', 1);
 		}
 
@@ -570,7 +570,7 @@ var SmallWorld = (function () {
 				possibleTargets;
 
 			// ...with probability p...
-			if (rand() < p) {
+			if (Math.random() < p) {
 
 				rewires++;
 
@@ -606,6 +606,38 @@ var SmallWorld = (function () {
 
 	}
 
+	function addRandomLinks(quantity) {
+
+		var i,
+			j,
+			m,
+			possible = [];
+
+		for (i = 0; i < n; i++) {
+			for (j = i + 1; j < n; j++) {
+				if (!graph.hasLink(i, j) && !(graph.hasLink(j, i))) {
+					possible.push([i, j]);
+				}
+			}
+		}
+
+		m = Math.min(possible.length, quantity);
+
+		possible.sort(function() {
+			return 0.5 - Math.random();
+		});
+
+		for (i = 0; i < m; i++) {
+
+			// ...with probability p...
+			if (Math.random() < p) {
+				graph.addLink(possible[i][0], possible[i][1]);
+			}
+
+		}
+
+	}
+
 	function createLinks() {
 
 		var i,
@@ -629,7 +661,13 @@ var SmallWorld = (function () {
 			}
 		}
 
-		randomRewire();
+		if (algo === SmallWorldAlgo.WattsStrogatz) {
+			randomRewire();
+		} else {
+			addRandomLinks(s);
+		}
+
+		
 
 	}
 
@@ -709,7 +747,8 @@ var SmallWorld = (function () {
 		breadthFirstSearchDepth: breadthFirstSearchDepth,
 		getDegrees: getDegrees,
 		dijktraShortestPath: dijktraShortestPath,
-		clusteringCoefficient: clusteringCoefficient
+		clusteringCoefficient: clusteringCoefficient,
+		addRandomLinks: addRandomLinks
 	};
 
 })();
@@ -720,11 +759,23 @@ function readHash() {
 
 	if (hash !== "") {
 
-		hash = hash.split("|");
-		if(hash.length === 3) {
-			n = parseInt(hash[0]);
-			k = parseInt(hash[1]);
-			p = parseFloat(hash[2]);
+		hash = hash.split("_");
+		if (hash.length >= 4) {
+			algo = parseInt(hash[0]);
+			n = parseInt(hash[1]);
+			k = parseInt(hash[2]);
+			p = parseFloat(hash[3]);
+			if (hash.length == 5) {
+				s = parseInt(hash[4]);
+			}
+		}
+
+		if (algo === SmallWorldAlgo.NewmannWatts) {
+			UI.nwAlgo.checked = true;
+			nwCheck();
+		} else {
+			UI.wsAlgo.checked = true;
+			wsCheck();
 		}
 
 		if (isNaN(n)) {
@@ -751,6 +802,14 @@ function readHash() {
 			p = +UI.pChanger.max;
 		}
 
+		if (isNaN(s)) {
+			s = 1;
+		} else if (s < +UI.sChanger.min) {
+			s = +UI.sChanger.min;
+		} else if (s > +UI.sChanger.max) {
+			s = +UI.sChanger.max;
+		}
+
 	}
 
 }
@@ -769,7 +828,15 @@ function updateL() {
 }
 
 function updateHash() {
-	window.location.hash = UI.nVal.innerHTML + "|" + UI.kVal.innerHTML + "|" + UI.pVal.innerHTML;
+
+	var newHash = algo + "_" + UI.nVal.innerHTML + "_" + UI.kVal.innerHTML + "_" + UI.pVal.innerHTML;
+
+	if (algo === SmallWorldAlgo.NewmannWatts) {
+		newHash += "_" + UI.sVal.innerHTML;
+	}
+
+	window.location.hash = newHash;
+
 }
 
 function init() {
@@ -785,7 +852,10 @@ function init() {
 	UI.pVal.innerHTML = p;
 	UI.pChanger.value = p;
 
-	SmallWorld.init(n, k, p);
+	UI.sVal.innerHTML = s;
+	UI.sChanger.value = s;
+
+	SmallWorld.init(algo, n, k, p, s);
 
 	updateHash();
 
@@ -827,10 +897,38 @@ UI.pChanger.addEventListener("input", function(e) {
 	UI.pVal.innerHTML = e.target.valueAsNumber;
 });
 
+UI.sChanger.addEventListener("change", function(e) {
+	var s = e.target.valueAsNumber;
+	UI.sVal.innerHTML = s;
+	updateHash();
+});
+UI.sChanger.addEventListener("input", function(e) {
+	UI.sVal.innerHTML = e.target.valueAsNumber;
+});
+
+UI.wsAlgo.addEventListener("change", wsCheck);
+
+function wsCheck() {
+	UI.pType.innerHTML = "rewiring";
+	UI.steps.className = "";
+	UI.rewireVal.className = "visible";
+	algo = SmallWorldAlgo.WattsStrogatz;
+	updateHash();
+}
+
+UI.nwAlgo.addEventListener("change", nwCheck);
+
+function nwCheck() {
+	UI.pType.innerHTML = "addition";
+	UI.steps.className = "visible";
+	UI.rewireVal.className = "";
+	algo = SmallWorldAlgo.NewmannWatts;
+	updateHash();
+}
+
 document.body.addEventListener('keyup', function(e) {
-	if (e.which === 32) {
+	if (e.which === 32 && p > 0) {
 		init();
-		drawChart();
 	}
 });
 
