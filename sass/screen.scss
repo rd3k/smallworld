@@ -14,10 +14,6 @@ body {
 	background: url('../tiny_grid.png');
 }
 
-body.loading svg {
-	opacity: .5;
-}
-
 body, svg {
     height: 100%;
     width: 100%;
@@ -25,7 +21,16 @@ body, svg {
     margin: 0;
     left: 0;
     top: 0;
-    z-index: -1;
+}
+
+aside {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: auto;
+	overflow: scroll;
+	z-index: 2;
 }
 
 .box {
@@ -82,6 +87,10 @@ body, svg {
 		line-height: 30px;
 	}
 
+}
+
+#randomness {
+	@extend .box;
 }
 
 #steps {

@@ -5,37 +5,44 @@
     <link href="css/screen.css" rel="stylesheet">
   </head>
   <body>
-    <div id="controls">
-      <div class="boxTitle">Controls</div>
-      <input type="radio" name="algo" id="wsAlgo">
-      <label for="wsAlgo" class="algo"> Watts-Strogatz</label><br><span class="desc">Random link rewiring</span><br>
-      <input type="radio" name="algo" id="nwAlgo">
-      <label for="nwAlgo" class="algo"> Newmann-Watts</label><br><span class="desc">Random link addition</span>
-      <hr>
-      <label for="nChanger">n: </label>
-      <input type="range" min="4" max="30" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
-      <hr>
-      <label for="kChanger">k: </label>
-      <input type="range" min="2" max="10" step="2" id="kChanger"><span id="kVal" class="val"></span><span class="desc">Number of initial nearest-neighbour links</span>
-      <hr>
-      <label for="pChanger">p: </label>
-      <input type="range" min="0.0" max="1.0" step=".1" id="pChanger"><span id="pVal" class="val"></span><span class="desc">Probability of link <span id="pType">rewiring</span></span>
-      <div id="steps">
+    <aside>
+      <div id="controls">
+        <div class="boxTitle">Controls</div>
+        <input type="radio" name="algo" id="wsAlgo">
+        <label for="wsAlgo" class="algo"> Watts-Strogatz</label><br><span class="desc">Random link rewiring</span><br>
+        <input type="radio" name="algo" id="nwAlgo">
+        <label for="nwAlgo" class="algo"> Newmann-Watts</label><br><span class="desc">Random link addition</span>
         <hr>
-        <label for="sChanger">s: </label>
-        <input type="range" min="0" max="400" id="sChanger"><span id="sVal" class="val">0</span><span class="desc">Number of link addition steps</span>
+        <label for="nChanger">n: </label>
+        <input type="range" min="4" max="30" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
+        <hr>
+        <label for="kChanger">k: </label>
+        <input type="range" min="2" max="10" step="2" id="kChanger"><span id="kVal" class="val"></span><span class="desc">Number of initial nearest-neighbour links</span>
+        <hr>
+        <label for="pChanger">p: </label>
+        <input type="range" min="0.0" max="1.0" step=".1" id="pChanger"><span id="pVal" class="val"></span><span class="desc">Probability of link <span id="pType">rewiring</span></span>
+        <div id="steps">
+          <hr>
+          <label for="sChanger">s: </label>
+          <input type="range" min="0" max="400" id="sChanger"><span id="sVal" class="val">0</span><span class="desc">Number of link addition steps</span>
+        </div>
       </div>
-    </div>
-    <div id="stats">
-      <div class="boxTitle">Stats</div><span id="edgesVal"></span><span id="componentsVal"></span><span id="rewireVal"></span><span id="clusterVal"></span>
-    </div>
-    <div id="avpathlength">
-      <div class="boxTitle">Average path length</div><span id="dijkstraLVal"></span><span id="bfsLVal"></span><span id="fwVal"></span>
-    </div>
+      <div id="stats">
+        <div class="boxTitle">Stats</div><span id="edgesVal"></span><span id="componentsVal"></span><span id="rewireVal"></span><span id="clusterVal"></span>
+      </div>
+      <div id="avpathlength">
+        <div class="boxTitle">Average path length</div><span id="dijkstraLVal"></span><span id="bfsLVal"></span><span id="fwVal"></span>
+      </div>
+      <div id="randomness">
+        <div class="boxTitle">Randomness</div><span id="seedVal"></span>
+        <pan class="desc">Pseudo-random number generator seed</pan>
+      </div>
+    </aside>
     <p id="help">Press space to generate a new network. Click two nodes to see the shortest path between them.</p>
     <div id="degreeChart" style="width: 300px; height: 300px;"></div>
     <script src="js/viva.min.js"></script>
     <script src="js/rng.min.js"></script>
+    <script src="js/randomness.js"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script src="js/main.js"></script>
   </body>

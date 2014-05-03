@@ -33,7 +33,8 @@ var SmallWorld = (function () {
 		fwVal: document.getElementById("fwVal"),
 		clusterVal: document.getElementById("clusterVal"),
 		wsAlgo: document.getElementById("wsAlgo"),
-		nwAlgo: document.getElementById("nwAlgo")
+		nwAlgo: document.getElementById("nwAlgo"),
+		seedVal: document.getElementById("seedVal")
 	};
 
 	var chartOptions = {
@@ -593,7 +594,7 @@ var SmallWorld = (function () {
 					possibleTargets;
 
 				// ...with probability p...
-				if (Math.random() < p) {
+				if (randomness.rand() < p) {
 
 					rewires++;
 
@@ -609,7 +610,7 @@ var SmallWorld = (function () {
 
 					if (possibleTargets.length > 0) {
 
-						graph.addLink(i, possibleTargets[~~(Math.random() * possibleTargets.length)], true);
+						graph.addLink(i, possibleTargets[~~(randomness.rand() * possibleTargets.length)], true);
 
 					} else {
 
@@ -647,13 +648,13 @@ var SmallWorld = (function () {
 			m = Math.min(possible.length, quantity);
 
 			possible.sort(function() {
-				return 0.5 - Math.random();
+				return 0.5 - randomness.rand();
 			});
 
 			for (i = 0; i < m; i++) {
 
 				// ...with probability p...
-				if (Math.random() < p) {
+				if (randomness.rand() < p) {
 					graph.addLink(possible[i][0], possible[i][1]);
 				}
 
@@ -904,6 +905,8 @@ var SmallWorld = (function () {
 		UI.sVal.innerHTML = s;
 		UI.sChanger.value = s;
 
+		UI.seedVal.innerHTML = randomness.seed;
+
 		SmallWorld.init(algo, n, k, p, s);
 
 		updateHash();
@@ -977,12 +980,16 @@ var SmallWorld = (function () {
 	}
 
 	document.body.addEventListener("keyup", function(e) {
-		if (e.which === 32 && p > 0) {
-			init();
+		if (e.which === 32) {
+			randomness.init();
+			if (p > 0) {
+				init();
+			}
 		}
 	});
 
 	window.addEventListener("hashchange", function() {
+		randomness.reset();
 		init();
 	}, false);
 
