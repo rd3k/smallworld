@@ -1,4 +1,39 @@
-var SmallWorld = (function () {
+var SmallWorld = (function() {
+
+	// From Modernizr 2.8.1
+	// IE9+, Android 3.0+
+	var supportsSVG = !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect;
+
+	// From Modernizr 2.8.1
+	// IE10+, iOS Safari 5.0+, Android 4.2+
+	var supportsRange = (function() {
+
+		var bool,
+			defaultView,
+			docElement = document.documentElement,
+			inputElem = document.createElement("input");
+
+		inputElem.setAttribute("type", "range");
+		bool = inputElem.type !== "text";
+
+		if (bool) {
+			inputElem.value = "v";
+			inputElem.style.cssText = "position:absolute;visibility:hidden;";
+			if (inputElem.style.WebkitAppearance !== undefined) {
+				docElement.appendChild(inputElem);
+				defaultView = document.defaultView;
+				bool = defaultView.getComputedStyle &&
+					defaultView.getComputedStyle(inputElem, null).WebkitAppearance !== 'textfield' &&
+					(inputElem.offsetHeight !== 0);
+				docElement.removeChild(inputElem);
+			} else {
+				bool = inputElem.value != smile;
+			}
+		}
+
+		return !!bool;
+
+	});
 
    'use strict';
 
@@ -45,7 +80,7 @@ var SmallWorld = (function () {
 			backgroundColor: { fill: "transparent" },
 			colors: ["#444"],
 			vAxis: {ticks: [], title: "Number of nodes"},
-			hAxis: {title: "Degree", tickshowTextEvery: 1, maxAlternation: 1, minTextSpacing: 0, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
+			hAxis: {title: "Degree", showTextEvery: 1, maxAlternation: 1, minTextSpacing: 0, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
 			chartArea: {left:30, top:30, width: 340, height: 220}
 		};
 
@@ -75,11 +110,6 @@ var SmallWorld = (function () {
 		chartOptions.vAxis.ticks = [];
 		for (i = 0; i <= maxq; i++) {
 			chartOptions.vAxis.ticks.push(i);
-		}
-
-		chartOptions.hAxis.ticks = [];
-		for (i = 0; i <= maxd; i++) {
-			chartOptions.hAxis.ticks.push(i);
 		}
 
 		chart.draw(data, chartOptions);
@@ -257,13 +287,13 @@ var SmallWorld = (function () {
 				highlightedNodeUI[i].attr("fill", "#000");
 			}
 
-			highlightedNodeUI = [];
+			highlightedNodeUI.length = 0;
 
 			for (i = 0; i < highlightedLinkUI.length; i++) {
 				highlightedLinkUI[i].attr("stroke", "#999").attr("stroke-width", 1);
 			}
 
-			highlightedLinkUI = [];
+			highlightedLinkUI.length = 0;
 
 		}
 
@@ -577,7 +607,7 @@ var SmallWorld = (function () {
 
 			// Remove all nodes and links
 			graph.clear();
-			nodeIDs = [];
+			nodeIDs.length = 0;
 
 			for (var i = 0; i < n; i++) {
 				graph.addNode(i);
@@ -920,7 +950,7 @@ var SmallWorld = (function () {
 
 		updateL();
 
-		UI.clusterVal.innerHTML = "Clustering coefficient: " + SmallWorld.clusteringCoefficient().toFixed(3);
+		UI.clusterVal.innerHTML = "Clustering: " + SmallWorld.clusteringCoefficient().toFixed(3);
 
 		drawChart();
 
