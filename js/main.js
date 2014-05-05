@@ -129,6 +129,7 @@ var SmallWorld = (function() {
 				graphics : graphics,
 				interactive: false
 			}),
+			nodeRadius = 7,
 			algo,
 			n,
 			k,
@@ -152,7 +153,7 @@ var SmallWorld = (function() {
 		// Circular nodes
 		graphics.node(function(node) {
 
-			var ui = Viva.Graph.svg("circle").attr("r", 5).attr("fill", "#000").attr("d", node.id);
+			var ui = Viva.Graph.svg("circle").attr("r", nodeRadius).attr("fill", "#000").attr("d", node.id);
 
 			ui.addEventListener("click", function(e) {
 
@@ -246,15 +247,15 @@ var SmallWorld = (function() {
 
 			path = dijktraShortestPath(from, to)[1];
 
-			nodeUI = graphics.getNodeUI(path[0]);
+			nodeUI = graphics.getNodeUI(to);
 			nodeUI.attr("fill", "red");
 			highlightedNodeUI.push(nodeUI);
 
 			if (path.length === 1) {
 
-				console.log("Unreachable");
-
-				
+				nodeUI = graphics.getNodeUI(from);
+				nodeUI.attr("fill", "#990000");
+				highlightedNodeUI.push(nodeUI);
 
 			} else {
 
