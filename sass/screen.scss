@@ -109,6 +109,7 @@ aside {
 	left: 0;
 	right: 0;
 	text-align: center;
+	font-size: 11px;
 }
 
 #degreeChart {
@@ -130,6 +131,33 @@ aside {
 	font-size: 10px;
 	display: block;
 	margin: 6px 0;
+}
+
+#info {
+	border: 1px #bbb solid;
+	padding: 8px;
+	@include border-radius(6px);
+	position: absolute;
+	bottom: 75px;
+	left: 50%;
+	background: #eee;
+	box-shadow: 0 0 25px #ccc;
+	font-size: 12px;
+	text-align: center;
+	display: none;
+
+	&.node {
+		display: block;
+		margin-left: -100px;
+		width: 200px;
+	}
+
+	&.path {
+		display: block;
+		margin-left: -200px;
+		width: 400px;
+	}
+
 }
 
 circle {

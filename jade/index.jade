@@ -50,7 +50,8 @@ html(lang="en")
         div.boxTitle= "Randomness"
         span(id="seedVal")
         pan(class="desc")= "Pseudo-random number generator seed"
-    p#help= "Press space to generate a new network. Click two nodes to see the shortest path between them."
+    div#info
+    p#help= "Press space to generate a new random seed. Click a node to see its degree. Click another node whilst holding shift to see the shortest path between them."
     div#degreeChart()
     script(src="js/viva.min.js")
     script(src="js/rng.min.js")

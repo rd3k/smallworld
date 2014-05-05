@@ -69,7 +69,8 @@ var SmallWorld = (function() {
 		clusterVal: document.getElementById("clusterVal"),
 		wsAlgo: document.getElementById("wsAlgo"),
 		nwAlgo: document.getElementById("nwAlgo"),
-		seedVal: document.getElementById("seedVal")
+		seedVal: document.getElementById("seedVal"),
+		info: document.getElementById("info")
 	};
 
 	var chartOptions = {
@@ -135,7 +136,6 @@ var SmallWorld = (function() {
 			s,
 			rewires = 0,
 			nodeIDs = [],
-			hoverHighlight = false,
 			highlightedLinkUI = [],
 			highlightedNodeUI = [],
 			pathFrom = null,
@@ -154,105 +154,19 @@ var SmallWorld = (function() {
 
 			var ui = Viva.Graph.svg("circle").attr("r", 5).attr("fill", "#000").attr("d", node.id);
 
-			ui.addEventListener("mousedown", function() {
+			ui.addEventListener("click", function(e) {
 
-				var path,
-					link,
-					nodeUI,
-					linkUI,
-					i;
+				e.stopPropagation();
 
-				console.log("Node %o has degree %o", node.id, graph.getLinks(node.id).length);
+				if (e.shiftKey && pathFrom !== null) {
 
-				if (pathFrom === null) {
-
-					pathFrom = node.id;
-
-					clearHighlight();
-
-					nodeUI = graphics.getNodeUI(pathFrom);
-					nodeUI.attr("fill", "red");
-					highlightedNodeUI.push(nodeUI);
+					showShortPath(pathFrom, node.id);
 
 				} else {
 
-					pathTo = node.id;
+					pathFrom = node.id;
+					showNodeLinks(node);
 
-					path = dijktraShortestPath(pathFrom, pathTo)[1];
-
-					if (path.length === 1) {
-
-						clearHighlight();
-						console.log("Unreachable");
-
-					} else {
-
-						nodeUI = graphics.getNodeUI(path[0]);
-						nodeUI.attr("fill", "red");
-						highlightedNodeUI.push(nodeUI);
-
-						for (i = 0; i < path.length - 1; i++) {
-							link = graph.hasLink(path[i], path[i + 1]);
-							if (!link) {
-								link = graph.hasLink(path[i + 1], path[i]);
-							}
-							linkUI = graphics.getLinkUI(link.id);
-							highlightedLinkUI.push(linkUI);
-							linkUI.attr("stroke", "red").attr("stroke-width", 2);
-						}
-
-					}
-
-					pathFrom = null;
-					pathTo = null;
-
-				}
-
-			});
-
-			ui.addEventListener("mouseover", function() {
-
-				if (!hoverHighlight) {
-					return;
-				}
-
-				var links = graph.getLinks(node.id),
-					linkUI,
-					fromUI,
-					toUI,
-					i;
-
-				for (i = 0; i < links.length; i++) {
-
-					linkUI = graphics.getLinkUI(links[i].id);
-
-					if (linkUI) {
-
-						highlightedLinkUI.push(linkUI);
-						linkUI.attr("stroke", "red").attr("stroke-width", 2);
-
-						toUI = graphics.getNodeUI(links[i].toId);
-						toUI.attr("fill", "red");
-						highlightedNodeUI.push(toUI);
-
-						fromUI = graphics.getNodeUI(links[i].fromId);
-						fromUI.attr("fill", "red");
-						highlightedNodeUI.push(fromUI);
-
-					}
-
-				}
-
-				fromUI = graphics.getNodeUI(node.id);
-				fromUI.attr("fill", "#990000");
-				highlightedNodeUI.push(fromUI);
-
-			});
-
-			ui.addEventListener("mouseout", function() {
-
-				if (hoverHighlight) {
-					clearHighlight();
 				}
 
 			});
@@ -278,6 +192,89 @@ var SmallWorld = (function() {
 			pathTo = null;
 			renderer.run();
 			create();
+
+		}
+
+		function showNodeLinks(node) {
+				
+			var links = graph.getLinks(node.id),
+				linkUI,
+				fromUI,
+				toUI,
+				i;
+
+			clearHighlight();
+
+			for (i = 0; i < links.length; i++) {
+
+				linkUI = graphics.getLinkUI(links[i].id);
+
+				if (linkUI) {
+
+					highlightedLinkUI.push(linkUI);
+					linkUI.attr("stroke", "red").attr("stroke-width", 2);
+
+					toUI = graphics.getNodeUI(links[i].toId);
+					toUI.attr("fill", "red");
+					highlightedNodeUI.push(toUI);
+
+					fromUI = graphics.getNodeUI(links[i].fromId);
+					fromUI.attr("fill", "red");
+					highlightedNodeUI.push(fromUI);
+
+				}
+
+			}
+
+			fromUI = graphics.getNodeUI(node.id);
+			fromUI.attr("fill", "#990000");
+			highlightedNodeUI.push(fromUI);
+
+			showNodeInfo(node.id, graph.getLinks(node.id).length);
+
+		}
+
+		function showShortPath(from, to) {
+
+			var path,
+				link,
+				nodeUI,
+				linkUI,
+				i;
+
+			clearHighlight();
+
+			path = dijktraShortestPath(from, to)[1];
+
+			nodeUI = graphics.getNodeUI(path[0]);
+			nodeUI.attr("fill", "red");
+			highlightedNodeUI.push(nodeUI);
+
+			if (path.length === 1) {
+
+				console.log("Unreachable");
+
+				
+
+			} else {
+
+				for (i = 0; i < path.length - 1; i++) {
+					link = graph.hasLink(path[i], path[i + 1]);
+					if (!link) {
+						link = graph.hasLink(path[i + 1], path[i]);
+					}
+					linkUI = graphics.getLinkUI(link.id);
+					highlightedLinkUI.push(linkUI);
+					linkUI.attr("stroke", "red").attr("stroke-width", 2);
+				}
+
+				nodeUI = graphics.getNodeUI(from);
+				nodeUI.attr("fill", "#990000");
+				highlightedNodeUI.push(nodeUI);
+
+			}
+
+			showPathInfo(from, to, path.length - 1);
 
 		}
 
@@ -826,7 +823,8 @@ var SmallWorld = (function() {
 			clusteringCoefficient: clusteringCoefficient,
 			addRandomLinks: addRandomLinks,
 			reachable: reachable,
-			componentCount: componentCount
+			componentCount: componentCount,
+			clearHighlight: clearHighlight
 		};
 
 	})();
@@ -1023,6 +1021,7 @@ var SmallWorld = (function() {
 	document.body.addEventListener("keyup", function(e) {
 		if (e.which === 32) {
 			randomness.init();
+			hideInfo();
 			updateHash();
 			if (p > 0) {
 				init();
@@ -1030,10 +1029,34 @@ var SmallWorld = (function() {
 		}
 	});
 
+	document.body.addEventListener("click", function() {
+		hideInfo()
+		SmallWorld.clearHighlight();
+	});
+
 	window.addEventListener("hashchange", function() {
 		randomness.reset();
+		hideInfo();
 		init();
 	}, false);
+
+	function hideInfo() {
+		UI.info.className = UI.info.innerHTML = "";
+	}
+
+	function showNodeInfo(node, degree) {
+		UI.info.className = "node";
+		UI.info.innerHTML = "Node " + node + " has degree " + degree;
+	}
+
+	function showPathInfo(from, to, length) {
+		UI.info.className = "path";
+		if (length === 0) {
+			UI.info.innerHTML = "Node " + to + " is not reachable from node " + from;
+		} else {
+			UI.info.innerHTML = "Shortest path from node " + from + " to node " + to + " is of length " + length;
+		}
+	}
 
 	return SmallWorld;
 
