@@ -62,16 +62,17 @@ aside {
 	@extend .box;
 
 	span {
-		display: block;
+		display: inline-block;
 		font-size: 11px;
 		line-height: 24px;
+		width: 50%;
 	}
 
 	#rewireVal {
 		display: none;
 		
 		&.visible {
-			display: block;
+			display: inline-block;
 		}
 
 	}
