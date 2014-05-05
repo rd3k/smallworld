@@ -1,5 +1,7 @@
 var SmallWorld = (function() {
 
+   'use strict';
+
 	// From Modernizr 2.8.1
 	// IE9+, Android 3.0+
 	var supportsSVG = !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect;
@@ -33,9 +35,7 @@ var SmallWorld = (function() {
 
 		return !!bool;
 
-	});
-
-   'use strict';
+	}());
 
 	google.load("visualization", "1", {packages:["corechart"], callback: init});
 
