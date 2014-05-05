@@ -141,7 +141,7 @@ aside {
 	bottom: 75px;
 	left: 50%;
 	background: #eee;
-	box-shadow: 0 0 25px #ccc;
+	@include box-shadow(0 0 25px #ccc);
 	font-size: 12px;
 	text-align: center;
 	display: none;
