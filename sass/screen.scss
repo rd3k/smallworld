@@ -206,7 +206,7 @@ circle {
 	cursor: pointer;
 }
 
-@for $i from 1 through 20 {
+@for $i from 1 through 30 {
 	.path-step-#{$i} {
 		@include transition(all .5s ease-out #{$i/2}s);
 		stroke: red;
