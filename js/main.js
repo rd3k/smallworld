@@ -1,6 +1,6 @@
 var SmallWorld = (function() {
 
-   'use strict';
+	'use strict';
 
 	// From Modernizr 2.8.1
 	// IE9+, Android 3.0+
@@ -29,7 +29,7 @@ var SmallWorld = (function() {
 					(inputElem.offsetHeight !== 0);
 				docElement.removeChild(inputElem);
 			} else {
-				bool = inputElem.value != smile;
+				bool = inputElem.value !== "v";
 			}
 		}
 
@@ -70,20 +70,23 @@ var SmallWorld = (function() {
 		wsAlgo: document.getElementById("wsAlgo"),
 		nwAlgo: document.getElementById("nwAlgo"),
 		seedVal: document.getElementById("seedVal"),
-		info: document.getElementById("info")
+		info: document.getElementById("info"),
+		fullScreen: document.getElementById("fullScreen")
 	};
 
+	UI.fullScreen.className = fullScreen.supported ? "enter" : "hidden";
+
 	var chartOptions = {
-			legend: {"position": "none"},
-			width: 380,
-			height: 300,
-			fontSize: 9,
-			backgroundColor: { fill: "transparent" },
-			colors: ["#444"],
-			vAxis: {ticks: [], title: "Number of nodes"},
-			hAxis: {title: "Degree", showTextEvery: 1, maxAlternation: 1, minTextSpacing: 0, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
-			chartArea: {left:30, top:30, width: 340, height: 220}
-		};
+		legend: {"position": "none"},
+		width: 380,
+		height: 300,
+		fontSize: 9,
+		backgroundColor: { fill: "transparent" },
+		colors: ["#444"],
+		vAxis: {ticks: [], title: "Number of nodes"},
+		hAxis: {title: "Degree", showTextEvery: 1, maxAlternation: 1, minTextSpacing: 0, baselineColor: "transparent", gridlines: {color: "transparent"}, minorGridlines: {count: 0}, slantedText: false},
+		chartArea: {left:30, top:30, width: 340, height: 220}
+	};
 
 	function drawChart() {
 
@@ -145,8 +148,9 @@ var SmallWorld = (function() {
 		// Draw as ring network
 		layout.placeNode(function(node) {
 
-			var angle = ((node.id / n) * 360) * (Math.PI / 180);
-			return {x: (8 * n) * Math.cos(angle), y: (8 * n) * Math.sin(angle)};
+			var angle = ((node.id / n) * 360) * (Math.PI / 180),
+				radius = Math.min(8 * n, 240);
+			return {x: radius * Math.cos(angle), y: radius * Math.sin(angle)};
 
 		});
 
@@ -156,6 +160,8 @@ var SmallWorld = (function() {
 			var ui = Viva.Graph.svg("circle").attr("r", nodeRadius).attr("fill", "#000").attr("d", node.id);
 
 			ui.addEventListener("click", function(e) {
+
+				fullScreen();
 
 				e.stopPropagation();
 
@@ -994,7 +1000,7 @@ var SmallWorld = (function() {
 		updateHash();
 	}
 	UI.sChanger.addEventListener("change", changeS);
-	UI.sChanger.addEventListener("touchend", changeS);	
+	UI.sChanger.addEventListener("touchend", changeS);
 	UI.sChanger.addEventListener("input", function(e) {
 		UI.sVal.innerHTML = e.target.valueAsNumber;
 	});
@@ -1019,6 +1025,16 @@ var SmallWorld = (function() {
 		updateHash();
 	}
 
+	UI.fullScreen.addEventListener("click", function() {
+		if (fullScreen.is()) {
+			fullScreen.exit();
+			UI.fullScreen.className = "enter";
+		} else {
+			fullScreen.enter();
+			UI.fullScreen.className = "exit";
+		}
+	});
+
 	document.body.addEventListener("keyup", function(e) {
 		if (e.which === 32) {
 			randomness.init();
@@ -1031,7 +1047,7 @@ var SmallWorld = (function() {
 	});
 
 	document.body.addEventListener("click", function() {
-		hideInfo()
+		hideInfo();
 		SmallWorld.clearHighlight();
 	});
 

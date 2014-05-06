@@ -15,7 +15,7 @@ html(lang="en")
         span(class="desc")= "Random link addition"
         hr
         label(for="nChanger")= "n: "
-        input(type="range", min="4", max="30" id="nChanger")
+        input(type="range", min="4", max="60" id="nChanger")
         span(id="nVal", class="val")
         span(class="desc")= "Number of nodes"
         hr
@@ -52,9 +52,11 @@ html(lang="en")
         pan(class="desc")= "Pseudo-random number generator seed"
     div#info
     p#help= "Press space to generate a new random seed. Click a node to see its degree. Click another node whilst holding shift to see the shortest path between them."
-    div#degreeChart()
+    div#degreeChart
+    a#fullScreen
     script(src="js/viva.min.js")
     script(src="js/rng.min.js")
     script(src="js/randomness.js")
+    script(src="js/fullscreen.min.js")
     script(src="https://www.google.com/jsapi")
     script(src="js/main.js")

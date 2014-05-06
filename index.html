@@ -14,7 +14,7 @@
         <label for="nwAlgo" class="algo"> Newmann-Watts</label><span class="desc">Random link addition</span>
         <hr>
         <label for="nChanger">n: </label>
-        <input type="range" min="4" max="30" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
+        <input type="range" min="4" max="60" id="nChanger"><span id="nVal" class="val"></span><span class="desc">Number of nodes</span>
         <hr>
         <label for="kChanger">k: </label>
         <input type="range" min="2" max="10" step="2" id="kChanger"><span id="kVal" class="val"></span><span class="desc">Number of initial nearest-neighbour links</span>
@@ -40,10 +40,11 @@
     </aside>
     <div id="info"></div>
     <p id="help">Press space to generate a new random seed. Click a node to see its degree. Click another node whilst holding shift to see the shortest path between them.</p>
-    <div id="degreeChart"></div>
+    <div id="degreeChart"></div><a id="fullScreen"></a>
     <script src="js/viva.min.js"></script>
     <script src="js/rng.min.js"></script>
     <script src="js/randomness.js"></script>
+    <script src="js/fullscreen.min.js"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script src="js/main.js"></script>
   </body>
