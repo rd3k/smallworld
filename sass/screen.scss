@@ -56,6 +56,10 @@ aside {
 		width: 130px;
 		text-align: left;
 	}
+
+	span.val.changing {
+		opacity: .5;
+	}
 }
 
 #stats {
@@ -138,24 +142,30 @@ aside {
 	padding: 8px;
 	@include border-radius(6px);
 	position: absolute;
-	bottom: 60px;
+	bottom: 50px;
 	left: 50%;
 	background: #eee;
 	@include box-shadow(0 0 25px #ccc);
 	font-size: 12px;
 	text-align: center;
-	display: none;
+	opacity: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	margin-left: -75px;
 
 	&.node {
-		display: block;
-		margin-left: -100px;
-		width: 200px;
+		opacity: 1.0;
+		width: 150px;
+		bottom: 60px;
+		@include transition(all .5s ease-out);
 	}
 
 	&.path {
-		display: block;
-		margin-left: -200px;
-		width: 400px;
+		opacity: 1.0;
+		margin-left: -175px;
+		width: 350px;
+		bottom: 60px;
+		@include transition(all .5s ease-out);
 	}
 
 }
@@ -171,6 +181,7 @@ aside {
 	right: 15px;
 	@include border-radius(6px);
 	border: 1px #666 solid;
+	@include transition(all .5s ease-out);
 	z-index: 9999;
 
 	&.enter {
@@ -183,6 +194,10 @@ aside {
 
 	&.hidden {
 		display: none;
+	}
+
+	&:hover {
+		@include transform(scale(1.1));
 	}
 
 }

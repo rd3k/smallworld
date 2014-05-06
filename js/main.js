@@ -962,45 +962,53 @@ var SmallWorld = (function() {
 	function changeN(e) {
 		var n = e.target.valueAsNumber;
 		UI.nVal.innerHTML = n;
+		UI.nVal.className = "val";
 		updateHash();
 	}
 	UI.nChanger.addEventListener("change", changeN);
 	UI.nChanger.addEventListener("touchend", changeN);
 	UI.nChanger.addEventListener("input", function(e) {
 		UI.nVal.innerHTML = e.target.valueAsNumber;
+		UI.nVal.className = "val changing";
 	});
 
 	function changeK(e) {
 		var k = e.target.valueAsNumber;
 		UI.kVal.innerHTML = k;
+		UI.kVal.className = "val";
 		updateHash();
 	}
 	UI.kChanger.addEventListener("change", changeK);
 	UI.kChanger.addEventListener("touchend", changeK);
 	UI.kChanger.addEventListener("input", function(e) {
 		UI.kVal.innerHTML = e.target.valueAsNumber;
+		UI.kVal.className = "val changing";
 	});
 
 	function changeP(e) {
 		var p = e.target.valueAsNumber;
 		UI.pVal.innerHTML = p;
+		UI.pVal.className = "val";
 		updateHash();
 	}
 	UI.pChanger.addEventListener("change", changeP);
 	UI.pChanger.addEventListener("touchend", changeP);
 	UI.pChanger.addEventListener("input", function(e) {
 		UI.pVal.innerHTML = e.target.valueAsNumber;
+		UI.pVal.className = "val changing";
 	});
 
 	function changeS(e) {
 		var s = e.target.valueAsNumber;
 		UI.sVal.innerHTML = s;
+		UI.sVal.className = "val";
 		updateHash();
 	}
 	UI.sChanger.addEventListener("change", changeS);
 	UI.sChanger.addEventListener("touchend", changeS);
 	UI.sChanger.addEventListener("input", function(e) {
 		UI.sVal.innerHTML = e.target.valueAsNumber;
+		UI.sVal.className = "val changing";
 	});
 
 	UI.wsAlgo.addEventListener("change", wsCheck);
