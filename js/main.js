@@ -4,7 +4,7 @@ var SmallWorld = (function() {
 
 	// From Modernizr 2.8.1
 	// IE9+, Android 3.0+
-	var supportsSVG = !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect;
+	var supportsSVG = !!document.createElementNS && !!document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGRect;
 
 	// From Modernizr 2.8.1
 	// IE10+, iOS Safari 5.0+, Android 4.2+
@@ -25,7 +25,7 @@ var SmallWorld = (function() {
 				docElement.appendChild(inputElem);
 				defaultView = document.defaultView;
 				bool = defaultView.getComputedStyle &&
-					defaultView.getComputedStyle(inputElem, null).WebkitAppearance !== 'textfield' &&
+					defaultView.getComputedStyle(inputElem, null).WebkitAppearance !== "textfield" &&
 					(inputElem.offsetHeight !== 0);
 				docElement.removeChild(inputElem);
 			} else {
@@ -1069,6 +1069,15 @@ var SmallWorld = (function() {
 		hideInfo();
 		init();
 	}, false);
+
+	function fullScreenChanged() {
+		UI.fullScreen.className = fullScreen.is() ? "exit" : "enter";
+	}
+
+	document.addEventListener("fullscreenchange", fullScreenChanged, false);
+	document.addEventListener("mozfullscreenchange", fullScreenChanged, false);
+	document.addEventListener("webkitfullscreenchange", fullScreenChanged, false);
+	document.addEventListener("MSFullscreenChange", fullScreenChanged, false);
 
 	function hideInfo() {
 		UI.info.className = UI.info.innerHTML = "";
