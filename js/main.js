@@ -921,7 +921,12 @@ var SmallWorld = (function() {
 			newHash += "_" + UI.sVal.innerHTML;
 		}
 
-		window.location.hash = newHash;
+		if (window.location.hash.replace("#", "") !== newHash) {
+			window.location.hash = newHash;
+			return true;
+		}
+
+		return false;
 
 	}
 
@@ -945,17 +950,19 @@ var SmallWorld = (function() {
 
 		SmallWorld.init(algo, n, k, p, s);
 
-		updateHash();
+		if (!updateHash()) {
 
-		UI.edgesVal.innerHTML = "Edges: " + SmallWorld.edgeCount();
-		UI.componentsVal.innerHTML = "Components: " + SmallWorld.componentCount();
-		UI.rewireVal.innerHTML = "Rewires: " + SmallWorld.rewireCount();
+			UI.edgesVal.innerHTML = "Edges: " + SmallWorld.edgeCount();
+			UI.componentsVal.innerHTML = "Components: " + SmallWorld.componentCount();
+			UI.rewireVal.innerHTML = "Rewires: " + SmallWorld.rewireCount();
 
-		updateL();
+			updateL();
 
-		UI.clusterVal.innerHTML = "Clustering: " + SmallWorld.clusteringCoefficient().toFixed(3);
+			UI.clusterVal.innerHTML = "Clustering: " + SmallWorld.clusteringCoefficient().toFixed(3);
 
-		drawChart();
+			drawChart();
+
+		}
 
 	}
 
