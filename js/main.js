@@ -161,8 +161,6 @@ var SmallWorld = (function() {
 
 			ui.addEventListener("click", function(e) {
 
-				fullScreen();
-
 				e.stopPropagation();
 
 				if (e.shiftKey && pathFrom !== null) {
