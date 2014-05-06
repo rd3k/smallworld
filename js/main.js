@@ -270,7 +270,7 @@ var SmallWorld = (function() {
 					}
 					linkUI = graphics.getLinkUI(link.id);
 					highlightedLinkUI.push(linkUI);
-					linkUI.attr("stroke", "red").attr("stroke-width", 2);
+					linkUI.attr("stroke-width", 2).attr("class", "path-step-" + (path.length - i - 1));
 				}
 
 				nodeUI = graphics.getNodeUI(from);
@@ -292,7 +292,7 @@ var SmallWorld = (function() {
 			highlightedNodeUI.length = 0;
 
 			for (i = 0; i < highlightedLinkUI.length; i++) {
-				highlightedLinkUI[i].attr("stroke", "#999").attr("stroke-width", 1);
+				highlightedLinkUI[i].attr("stroke", "#999").attr("stroke-width", 1).attr("class", "");
 			}
 
 			highlightedLinkUI.length = 0;
