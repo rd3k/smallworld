@@ -1,0 +1,58 @@
+doctype html
+html(lang="en")
+  head
+    title= "Small-world network"
+    link(href="css/screen.css", rel="stylesheet")
+  body
+    aside
+      div#controls
+        div.boxTitle= "Controls"
+        input(type="radio" name="algo" id="wsAlgo")
+        label(for="wsAlgo" class="algo")= " Watts-Strogatz"
+        span(class="desc")= "Random link rewiring"
+        input(type="radio" name="algo" id="nwAlgo")
+        label(for="nwAlgo" class="algo")= " Newmann-Watts"
+        span(class="desc")= "Random link addition"
+        hr
+        label(for="nChanger")= "n: "
+        input(type="range", min="4", max="60" id="nChanger")
+        span(id="nVal", class="val")
+        span(class="desc")= "Number of nodes"
+        hr
+        label(for="kChanger")= "k: "
+        input(type="range", min="2", max="10" step="2" id="kChanger")
+        span(id="kVal", class="val")
+        span(class="desc")= "Number of initial nearest-neighbour links"
+        hr
+        label(for="pChanger")= "p: "
+        input(type="range", min="0.0", max="1.0", step=".1", id="pChanger")
+        span(id="pVal", class="val")
+        span(class="desc")= "Probability of link "
+          span(id="pType")= "rewiring"
+        div#steps
+          hr
+          label(for="sChanger")= "s: "
+          input(type="range", min="0", max="400", id="sChanger")
+          span(id="sVal", class="val")= "0"
+          span(class="desc")= "Number of link addition steps"
+      div#stats
+        div.boxTitle= "Stats"
+        span(id="edgesVal")
+        span(id="componentsVal")
+        span(id="rewireVal")
+        span(id="clusterVal")
+      div#avpathlength
+        div.boxTitle= "Average path length"
+        span(id="dijkstraLVal")
+        span(id="bfsLVal")
+        span(id="fwVal")
+      div#randomness
+        div.boxTitle= "Randomness"
+        span(id="seedVal")
+        pan(class="desc")= "Pseudo-random number generator seed"
+    div#info
+    p#help= "Press space to generate a new random seed. Click a node to see its degree. Click another node whilst holding shift to see the shortest path between them."
+    div#degreeChart
+    a#fullScreen
+    script(src="https://www.google.com/jsapi")
+    script(src="js/all.min.js")
