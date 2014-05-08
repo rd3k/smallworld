@@ -66,6 +66,7 @@ var SmallWorld = (function() {
 		dijkstraLVal: document.getElementById("dijkstraLVal"),
 		bfsLVal: document.getElementById("bfsLVal"),
 		fwVal: document.getElementById("fwVal"),
+		effVal: document.getElementById("effVal"),
 		clusterVal: document.getElementById("clusterVal"),
 		wsAlgo: document.getElementById("wsAlgo"),
 		nwAlgo: document.getElementById("nwAlgo"),
@@ -587,6 +588,40 @@ var SmallWorld = (function() {
 
 		}
 
+		function networkPathEfficiency() {
+
+			var sum = 0.0,
+				noOfPaths = 0,
+				dist = 0,
+				dists,
+				result,
+				i,
+				j;
+
+			
+			for (i = 0; i < n; i++) {
+
+				result = dijkstra(i);
+				dists = result[0];
+
+				for (j = i + 1; j < n; j++) {
+
+					dist = dists[j];
+					
+					if (dist != Number.MAX_VALUE) {
+						sum += dist;
+						++noOfPaths;
+					}
+
+				}
+			}
+
+			sum = sum / noOfPaths;
+
+			return sum;
+
+		}
+
 		function create() {
 
 			createNodes();
@@ -823,6 +858,7 @@ var SmallWorld = (function() {
 			rewireCount: rewireCount,
 			averageGeodesicDistance: averageGeodesicDistance,
 			breadthFirstSearchDepth: breadthFirstSearchDepth,
+			networkPathEfficiency: networkPathEfficiency,
 			getDegrees: getDegrees,
 			dijktraShortestPath: dijktraShortestPath,
 			clusteringCoefficient: clusteringCoefficient,
@@ -910,6 +946,10 @@ var SmallWorld = (function() {
 
 		result = SmallWorld.averageGeodesicDistance(ShortestPathAlgo.FloydWarshall);
 		UI.fwVal.innerHTML = "Floyd Warshall: " + result[0].toFixed(2) + " (" + result[1].toFixed(3) + " ms)";
+
+		result = SmallWorld.networkPathEfficiency();
+		console.log(result);
+		UI.effVal.innerHTML = "Network path efficiency: " + result.toFixed(2);	
 
 	}
 
