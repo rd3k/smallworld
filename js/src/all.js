@@ -1,0 +1,8 @@
+// @codekit-append "viva.min.js"
+// @codekit-append "permnowpolyfill.min.js"
+// @codekit-append "rng.min.js"
+// @codekit-append "FullScreen.js"
+// @codekit-append "InfoBubble.js"
+// @codekit-append "Random.js"
+// @codekit-append "ShortestPathAlgo.js"
+// @codekit-append "SmallWorldAlgo.js"

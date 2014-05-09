@@ -1,0 +1,1 @@
+var App;!function(t){var a;!function(t){t[t.WattsStrogatz=0]="WattsStrogatz",t[t.NewmannWatts=1]="NewmannWatts"}(a||(a={}))}(App||(App={}));
