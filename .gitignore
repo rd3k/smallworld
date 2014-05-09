@@ -4,3 +4,5 @@
 ._*
 .Spotlight-V100
 .Trashes
+js/src/*.js
+!js/src/lib/*.js
